@@ -1,0 +1,26 @@
+{
+  "additionalQueries": {
+    "label": "Additional Queries",
+    "addButton": "+ Add Query",
+    "placeholder": "Query",
+    "maxCountReached": "Maximum number of queries reached"
+  },
+  "common": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "loading": "Loading..."
+  },
+  "validation": {
+    "required": "Field is required",
+    "minLength": "Minimum length is {{count}} characters",
+    "maxLength": "Maximum length is {{count}} characters"
+  },
+  "buttons": {
+    "submit": "Submit",
+    "reset": "Reset",
+    "back": "Back",
+    "next": "Next"
+  }
+}
