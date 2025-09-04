@@ -101,7 +101,9 @@ const Semantix: React.FC = () => {
   const [itemsPerPage, setItemsPerPage] = useState("25");
   const [selectedTableRows, setSelectedTableRows] = useState<string[]>([]);
   const [sortColumn, setSortColumn] = useState<string | null>(null);
-  const [sortDirection, setSortDirection] = useState<"asc" | "desc" | null>(null);
+  const [sortDirection, setSortDirection] = useState<"asc" | "desc" | null>(
+    null,
+  );
 
   // Фильтры и поиск
   const [showFilters, setShowFilters] = useState(false);
@@ -201,7 +203,11 @@ const Semantix: React.FC = () => {
       if (!savedStr) return;
       const saved = JSON.parse(savedStr);
       setWebsiteUrl(saved.websiteUrl || "");
-      setCompetitors(Array.isArray(saved.competitors) && saved.competitors.length ? saved.competitors : [""]);
+      setCompetitors(
+        Array.isArray(saved.competitors) && saved.competitors.length
+          ? saved.competitors
+          : [""],
+      );
       if (saved.region) setRegion(saved.region);
       setManualQueries(saved.manualQueries || "");
       setSearchEngine(saved.searchEngine || "yandex");
@@ -215,33 +221,42 @@ const Semantix: React.FC = () => {
       setCityExclusions(saved.cityExclusions || "");
       setItemsPerPage(saved.itemsPerPage || "25");
       setSearchQuery(saved.searchQuery || "");
-      if (saved.selectedServices) setSelectedServices({
-        keyso: !!saved.selectedServices.keyso,
-        bukvarix: !!saved.selectedServices.bukvarix,
-        yandexMetrika: !!saved.selectedServices.yandexMetrika,
-        yandexWebmaster: !!saved.selectedServices.yandexWebmaster,
-        gsc: !!saved.selectedServices.gsc,
-      });
-      if (saved.cleaningParams) setCleaningParams({
-        duplicates: !!saved.cleaningParams.duplicates,
-        numbers: !!saved.cleaningParams.numbers,
-        adult: !!saved.cleaningParams.adult,
-        stopWords: !!saved.cleaningParams.stopWords,
-        singleWords: !!saved.cleaningParams.singleWords,
-        citiesRF: !!saved.cleaningParams.citiesRF,
-        latin: !!saved.cleaningParams.latin,
-        specialChars: !!saved.cleaningParams.specialChars,
-        wordRepeats: !!saved.cleaningParams.wordRepeats,
-      });
-      if (typeof saved.allSelected === "boolean") setAllSelected(saved.allSelected);
-      if (typeof saved.excludeMain === "boolean") setExcludeMain(saved.excludeMain);
+      if (saved.selectedServices)
+        setSelectedServices({
+          keyso: !!saved.selectedServices.keyso,
+          bukvarix: !!saved.selectedServices.bukvarix,
+          yandexMetrika: !!saved.selectedServices.yandexMetrika,
+          yandexWebmaster: !!saved.selectedServices.yandexWebmaster,
+          gsc: !!saved.selectedServices.gsc,
+        });
+      if (saved.cleaningParams)
+        setCleaningParams({
+          duplicates: !!saved.cleaningParams.duplicates,
+          numbers: !!saved.cleaningParams.numbers,
+          adult: !!saved.cleaningParams.adult,
+          stopWords: !!saved.cleaningParams.stopWords,
+          singleWords: !!saved.cleaningParams.singleWords,
+          citiesRF: !!saved.cleaningParams.citiesRF,
+          latin: !!saved.cleaningParams.latin,
+          specialChars: !!saved.cleaningParams.specialChars,
+          wordRepeats: !!saved.cleaningParams.wordRepeats,
+        });
+      if (typeof saved.allSelected === "boolean")
+        setAllSelected(saved.allSelected);
+      if (typeof saved.excludeMain === "boolean")
+        setExcludeMain(saved.excludeMain);
       if (typeof saved.parseW === "boolean") setParseW(saved.parseW);
       if (typeof saved.parseNotW === "boolean") setParseNotW(saved.parseNotW);
-      if (typeof saved.parseWQuoted === "boolean") setParseWQuoted(saved.parseWQuoted);
-      if (typeof saved.excludePorno === "boolean") setExcludePorno(saved.excludePorno);
-      if (typeof saved.excludeNews === "boolean") setExcludeNews(saved.excludeNews);
-      if (typeof saved.showBasket === "boolean") setShowBasket(saved.showBasket);
-      if (typeof saved.showFilters === "boolean") setShowFilters(saved.showFilters);
+      if (typeof saved.parseWQuoted === "boolean")
+        setParseWQuoted(saved.parseWQuoted);
+      if (typeof saved.excludePorno === "boolean")
+        setExcludePorno(saved.excludePorno);
+      if (typeof saved.excludeNews === "boolean")
+        setExcludeNews(saved.excludeNews);
+      if (typeof saved.showBasket === "boolean")
+        setShowBasket(saved.showBasket);
+      if (typeof saved.showFilters === "boolean")
+        setShowFilters(saved.showFilters);
       if (saved.filters) {
         setFilters({
           relevantPage: saved.filters.relevantPage || "",
@@ -461,8 +476,7 @@ const Semantix: React.FC = () => {
     setConfirmDialog({
       open: true,
       title: "Подтвердите парсинг",
-      description:
-        "Вы уверены, что хотите запустить парсинг ключевых слов?",
+      description: "Вы уверены, что хотите запустить парсинг ключевых слов?",
       onConfirm: async () => {
         await parseKeywords({
           region,
@@ -478,7 +492,8 @@ const Semantix: React.FC = () => {
     setConfirmDialog({
       open: true,
       title: "Подтвердите чистку",
-      description: "Вы уверены, что хотите выполнить чистку ключевых слов согласно выбранным настройкам?",
+      description:
+        "Вы уверены, что хотите выполнить чистку ключевых слов согласно выбранным настройкам?",
       onConfirm: async () => {
         await cleanKeywords({
           region,
@@ -670,7 +685,8 @@ const Semantix: React.FC = () => {
     setConfirmDialog({
       open: true,
       title: "Подтвердите удаление",
-      description: "Вы уверены, что хотите очистить все данные? Это действие нельзя отменить.",
+      description:
+        "Вы уверены, что хотите очистить все данные? Это действие нельзя отменить.",
       variant: "destructive",
       onConfirm: async () => {
         await clearKeywords();
@@ -800,77 +816,80 @@ const Semantix: React.FC = () => {
       label: "Запрос",
       sortable: true,
       sortType: "string",
-      tooltip: "Поисковая фраза или ключевое слово"
+      tooltip: "Поисковая фраза или ключевое слово",
     },
     {
       key: "relevantPage",
       label: "Релевантная страница",
       sortable: true,
       sortType: "string",
-      tooltip: "URL страницы сайта, наиболее подходящей для данного запроса"
+      tooltip: "URL страницы сайта, наиболее подходящей для данного запроса",
     },
     {
       key: "group",
       label: "Группа",
       sortable: true,
       sortType: "string",
-      tooltip: "Тематическая группа запросов для удобной организации семантического ядра"
+      tooltip:
+        "Тематическая группа запросов для удобной организации семантического ядра",
     },
     {
       key: "position",
       label: "Позиция",
       sortable: true,
       sortType: "number",
-      tooltip: "Текущая позиция сайта в поисковой выдаче по данному запросу"
+      tooltip: "Текущая позиция сайта в поисковой выдаче по данному запросу",
     },
     {
       key: "w",
       label: "W",
       sortable: true,
       sortType: "number",
-      tooltip: "Количество запросов в месяц (частотность) в Яндекс.Вордстат"
+      tooltip: "Количество запросов в месяц (частотность) в Яндекс.Вордстат",
     },
     {
       key: "wQuotes",
       label: '"W"',
       sortable: true,
       sortType: "number",
-      tooltip: "Точная частотность запроса в кавычках в Яндекс.Вордстат"
+      tooltip: "Точная частотность запроса в кавычках в Яндекс.Вордстат",
     },
     {
       key: "wNot",
       label: "!W",
       sortable: true,
       sortType: "number",
-      tooltip: "Частотность с оператором ! (фиксированный порядок слов) в Яндекс.Вордстат"
+      tooltip:
+        "Частотность с оператором ! (фиксированный порядок слов) в Яндекс.Вордстат",
     },
     {
       key: "demand",
       label: "Спрос",
       sortable: true,
       sortType: "number",
-      tooltip: "Количество показов по данному запросу в месяц"
+      tooltip: "Количество показов по данному запросу в месяц",
     },
     {
       key: "clicks",
       label: "Клики",
       sortable: true,
       sortType: "number",
-      tooltip: "Примерное количество кликов по запросу в месяц"
+      tooltip: "Примерное количество кликов по запросу в месяц",
     },
     {
       key: "competition",
       label: "Конкурентность",
       sortable: true,
       sortType: "competition",
-      tooltip: "Уровень конкуренции по данному запросу (Низкая/Умеренная/Высокая)"
+      tooltip:
+        "Уровень конкуренции по данному запросу (Низкая/Умеренная/Высокая)",
     },
     {
       key: "commerce",
       label: "Коммерция",
       sortable: true,
       sortType: "number",
-      tooltip: "Показатель коммерческой направлен��ости запроса в процентах"
+      tooltip: "Показатель коммерческой направлен��ости запроса в процентах",
     },
   ];
 
@@ -1014,8 +1033,10 @@ const Semantix: React.FC = () => {
           Высокая: 3,
           "Нет данных": 0,
         };
-        const aOrder = competitionOrder[aValue as keyof typeof competitionOrder] || 0;
-        const bOrder = competitionOrder[bValue as keyof typeof competitionOrder] || 0;
+        const aOrder =
+          competitionOrder[aValue as keyof typeof competitionOrder] || 0;
+        const bOrder =
+          competitionOrder[bValue as keyof typeof competitionOrder] || 0;
         result = aOrder - bOrder;
       } else {
         const aStr = String(aValue);
@@ -1079,7 +1100,7 @@ const Semantix: React.FC = () => {
       phrase_space: "spc",
       phrase_en: "lat",
       phrase_ru: "cyr",
-      phrase_numbers: "dig"
+      phrase_numbers: "dig",
     };
     return mapping[method] || "nrm";
   };
@@ -1128,7 +1149,6 @@ const Semantix: React.FC = () => {
           onConfirm={newGroupDialog.onConfirm}
           existingGroups={existingGroups}
         />
-
 
         {/*/!* От��бражение активных задач *!/*/}
         {/*{activeTasks.length > 0 && (*/}
@@ -1397,7 +1417,10 @@ const Semantix: React.FC = () => {
               options={[
                 { value: "phrase", label: "Фраза" },
                 { value: "phrase_space", label: "Фраза и пробел" },
-                { value: "phrase_en", label: "Фраза и английский алфавит [a-z]" },
+                {
+                  value: "phrase_en",
+                  label: "Фраза и английский алфавит [a-z]",
+                },
                 { value: "phrase_ru", label: "Фраза и русский алфавит [а-я]" },
                 { value: "phrase_numbers", label: "Фраза и цифры [0-9]" },
               ]}
@@ -2211,12 +2234,16 @@ const Semantix: React.FC = () => {
       <div className="mt-6 space-y-4">
         {activeTasks.length > 0 && (
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-            <h3 className={cn(typography.fieldLabel, "mb-3")}>Активные задачи:</h3>
+            <h3 className={cn(typography.fieldLabel, "mb-3")}>
+              Активные задачи:
+            </h3>
             {activeTasks.map((task) => (
               <div key={task.id} className="mb-2">
                 <div className="flex justify-between items-center mb-1">
                   <span className={cn(typography.bodyText)}>{task.name}</span>
-                  <span className={cn(typography.bodyText)}>{task.progress}%</span>
+                  <span className={cn(typography.bodyText)}>
+                    {task.progress}%
+                  </span>
                 </div>
                 <ProgressBar progress={task.progress} color="red" />
               </div>
@@ -2230,7 +2257,9 @@ const Semantix: React.FC = () => {
         )}
         {message && (
           <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
-            <p className={cn(typography.bodyText, "text-green-700")}>{message}</p>
+            <p className={cn(typography.bodyText, "text-green-700")}>
+              {message}
+            </p>
           </div>
         )}
       </div>

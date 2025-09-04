@@ -1,8 +1,8 @@
 // client/components/auth/ProtectedRoute.jsx
 
-import React from 'react';
-import { Navigate } from 'react-router-dom';
-import { useAuth } from '../../hooks/useAuth.jsx';
+import React from "react";
+import { Navigate } from "react-router-dom";
+import { useAuth } from "../../hooks/useAuth.jsx";
 
 const ProtectedRoute = ({ children, requireAdmin = false }) => {
   const { user, isAuthenticated, loading } = useAuth();

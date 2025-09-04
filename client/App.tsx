@@ -153,7 +153,14 @@ const MainApp: React.FC = () => {
             </ProtectedRoute>
           }
         />
-        <Route path="/admin" element={<ProtectedRoute requireAdmin={true}><Admin /></ProtectedRoute>} />
+        <Route
+          path="/admin"
+          element={
+            <ProtectedRoute requireAdmin={true}>
+              <Admin />
+            </ProtectedRoute>
+          }
+        />
 
         <Route
           path="/app/analyzer"
