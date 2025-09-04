@@ -22,6 +22,7 @@ export interface CreateQueryIndexTaskRequest {
   project_id: string;
   keywords: string;
   files: string[];
+  fileNames: string[];
   stop_words?: string;
   exclude_cities?: string;
   filters?: string;
@@ -70,8 +71,8 @@ function buildQueryParams(params: Record<string, string | number>): string {
 }
 
 // Mock token and project_id - в реал��ном проекте эти данные должны браться из контекста/localStorage
-const getMockCredentials = () => ({
-  token: "mock-jwt-token",
+const getCredentials = () => ({
+  token: localStorage.getItem("access_token"),
   project_id: "mock-project-id",
 });
 
@@ -79,14 +80,14 @@ const getMockCredentials = () => ({
 export const queryIndexApi = {
   // Get task status
   async getTaskStatus(): Promise<QueryIndexTaskStatus> {
-    const { token, project_id } = getMockCredentials();
+    const { token, project_id } = getCredentials();
     const params = buildQueryParams({ token, project_id });
     return apiCall<QueryIndexTaskStatus>(`/fetchQueryIndexTask?${params}`);
   },
 
   // Get task data
   async getTaskData(): Promise<QueryIndexData> {
-    const { token, project_id } = getMockCredentials();
+    const { token, project_id } = getCredentials();
     const params = buildQueryParams({ token, project_id });
     return apiCall<QueryIndexData>(`/fetchQueryIndexData?${params}`);
   },
@@ -95,12 +96,13 @@ export const queryIndexApi = {
   async createTask(
     request: Omit<CreateQueryIndexTaskRequest, "token" | "project_id">,
   ): Promise<CreateQueryIndexTaskResponse> {
-    const { token, project_id } = getMockCredentials();
+    const { token, project_id } = getCredentials();
     const params = buildQueryParams({
       token,
       project_id,
       keywords: request.keywords,
       files: JSON.stringify(request.files),
+      fileNames: JSON.stringify(request.fileNames),
       filters: request.filters || "",
       stop_words: request.stop_words || "",
       exclude_cities: request.exclude_cities || "",
@@ -115,7 +117,6 @@ export const queryIndexApi = {
       },
     );
 
-    console.log("dich1");
     console.log(response);
 
     return response;
@@ -123,7 +124,7 @@ export const queryIndexApi = {
 
   // Download keywords
   async downloadKeywords(): Promise<Blob> {
-    const { token, project_id } = getMockCredentials();
+    const { token, project_id } = getCredentials();
     const params = buildQueryParams({ token, project_id });
 
     const response = await fetch(`${API_BASE_URL}/downloadKeywords?${params}`);
@@ -138,7 +139,7 @@ export const queryIndexApi = {
 
   // Download competitors
   async downloadCompetitors(): Promise<Blob> {
-    const { token, project_id } = getMockCredentials();
+    const { token, project_id } = getCredentials();
     const params = buildQueryParams({ token, project_id });
 
     const response = await fetch(

@@ -76,7 +76,7 @@ npm test          # Run Vitest tests
 Open `client/global.css` and `tailwind.config.ts` and add new tailwind colors.
 
 ### New API Route
-1. **Optional**: Create a shared interface in `shared/query-api.ts`:
+1. **Optional**: Create a shared interface in `client/lib/query-api.ts`:
 ```typescript
 export interface MyRouteResponse {
   message: string;

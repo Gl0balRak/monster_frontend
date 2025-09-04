@@ -1,4 +1,5 @@
 import React, { useEffect } from "react";
+import { API_CONFIG, buildUrl } from "@/config/api.config.ts";
 
 interface AuthHandlerProps {
   onAuthComplete?: () => void;
@@ -13,21 +14,22 @@ export const AuthHandler: React.FC<AuthHandlerProps> = ({ onAuthComplete }) => {
       // Обработка Yandex авторизации
       if (currentPath === "/auth/yandex/success") {
         const token = urlParams.get("token");
+
         if (token) {
           try {
             // Получаем JWT токен из localStorage (должен быть сохранен ранее)
-            const userToken = localStorage.getItem("userToken") || "";
+            const userToken = localStorage.getItem("access_token") || "";
             
             // Отправляем токен на бэкенд
-            const response = await fetch("/api/auth/yandex/set_token", {
+            const response = await fetch(buildUrl(API_CONFIG.ENDPOINTS.YANDEX_SET_TOKEN), {
               method: "POST",
               headers: {
-                "Content-Type": "application/x-www-form-urlencoded",
+                "Content-Type": "application/json",
                 "Authorization": `Bearer ${userToken}`,
               },
-              body: new URLSearchParams({
-                yandex_token: token,
-              }),
+              body: JSON.stringify({
+                yandex_token: token
+              })
             });
 
             if (response.ok) {
@@ -35,7 +37,7 @@ export const AuthHandler: React.FC<AuthHandlerProps> = ({ onAuthComplete }) => {
               localStorage.setItem("autoResumeParsing", "true");
               
               // Возвращаемся на главную страницу
-              window.location.href = "/";
+              window.location.href = "/app";
               
               if (onAuthComplete) {
                 onAuthComplete();
@@ -53,14 +55,14 @@ export const AuthHandler: React.FC<AuthHandlerProps> = ({ onAuthComplete }) => {
       if (currentPath === "/auth/google/success") {
         const token = urlParams.get("token");
         const refreshToken = urlParams.get("refresh_token");
-        
+
         if (token) {
           try {
             // Получаем JWT токен из localStorage
-            const userToken = localStorage.getItem("userToken") || "";
+            const userToken = localStorage.getItem("access_token") || "";
             
             // Отправляем токен на бэкенд
-            const response = await fetch("/api/auth/google/set_token", {
+            const response = await fetch(buildUrl(API_CONFIG.ENDPOINTS.GOOGLE_SET_TOKEN), {
               method: "POST",
               headers: {
                 "Content-Type": "application/x-www-form-urlencoded",

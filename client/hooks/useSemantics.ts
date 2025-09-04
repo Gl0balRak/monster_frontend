@@ -319,7 +319,7 @@ export const useSemantics = (): UseSemanticsReturn => {
         // Проверяем, требуется ли авторизация
         if (response.requires_auth && response.auth_url) {
           // Открываем окно авторизации
-          window.open(response.auth_url, "_blank", "width=600,height=600");
+          window.location.href = response.auth_url;
           return; // Не обрабатываем ответ здесь, продолжим после авторизации
         }
 

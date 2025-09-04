@@ -43,7 +43,7 @@ export interface Region {
 }
 
 // Мок-функция для получения токена
-const getAuthToken = () => "Bearer mock-jwt-token";
+const getAuthToken = () => "Bearer " + localStorage.getItem("access_token");
 
 // Базовая функция для API запросов
 async function apiCall<T>(endpoint: string, options?: RequestInit): Promise<T> {
