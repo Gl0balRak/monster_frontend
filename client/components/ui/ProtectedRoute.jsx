@@ -23,7 +23,7 @@ const ProtectedRoute = ({ children, requireAdmin = false }) => {
 
   // Если требуются права админа, но их нет
   if (requireAdmin && !user?.is_admin) {
-    return <Navigate to="/dashboard" replace />;
+    return <Navigate to="/app" replace />;
   }
 
   // Если все проверки пройдены - показываем контент
