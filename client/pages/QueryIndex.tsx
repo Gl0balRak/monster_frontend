@@ -61,6 +61,19 @@ const QueryIndexPage: React.FC = () => {
       setCompetitorTopSize(saved.competitorTopSize || "10");
       setStopWordsText(saved.stopWordsText || "");
       setExcludeCitiesText(saved.excludeCitiesText || "");
+      if (saved.filters) {
+        setFilters({
+          duplicates: !!saved.filters.duplicates,
+          stopWords: !!saved.filters.stopWords,
+          latin: !!saved.filters.latin,
+          numbers: !!saved.filters.numbers,
+          singleWords: !!saved.filters.singleWords,
+          symbols: !!saved.filters.symbols,
+          adult: !!saved.filters.adult,
+          citiesRF: !!saved.filters.citiesRF,
+          wordRepeats: !!saved.filters.wordRepeats,
+        });
+      }
     } catch (e) {
       console.error("Failed to restore QueryIndex form from storage", e);
     }
@@ -74,11 +87,12 @@ const QueryIndexPage: React.FC = () => {
       competitorTopSize,
       stopWordsText,
       excludeCitiesText,
+      filters,
     };
     try {
       localStorage.setItem("queryIndexForm", JSON.stringify(state));
     } catch {}
-  }, [keywordsText, parsingDepth, competitorTopSize, stopWordsText, excludeCitiesText]);
+  }, [keywordsText, parsingDepth, competitorTopSize, stopWordsText, excludeCitiesText, filters]);
 
   // API интеграция
   const {
@@ -105,7 +119,7 @@ const QueryIndexPage: React.FC = () => {
     setUploadedFiles(newFiles);
   };
 
-  // Обработка изменения фильтров
+  // Обраб��тка изменения фильтров
   const handleFilterChange = (filterKey: string, checked: boolean) => {
     setFilters((prev) => ({
       ...prev,
