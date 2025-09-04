@@ -165,15 +165,26 @@ const Semantix: React.FC = () => {
     onConfirm: () => {},
   });
 
-  // Загрузка регионов пр�� монтировании
+  // Загрузка регионов при монтировании + восстановление сохраненного региона
   useEffect(() => {
     const loadRegions = async () => {
       try {
         const response = await semantixApi.getRegions();
         if (response.success && response.regions.length > 0) {
           setAvailableRegions(response.regions);
-          // Устанавливаем первый регион из списка
-          setRegion(response.regions[0].value);
+          let savedRegion = "";
+          try {
+            const saved = localStorage.getItem("semantixForm");
+            if (saved) {
+              const parsed = JSON.parse(saved);
+              savedRegion = parsed.region || "";
+            }
+          } catch {}
+          if (savedRegion) {
+            setRegion(savedRegion);
+          } else {
+            setRegion(response.regions[0].value);
+          }
         }
       } catch (err) {
         console.error("Error loading regions:", err);
@@ -182,6 +193,97 @@ const Semantix: React.FC = () => {
 
     loadRegions();
   }, []);
+
+  // Инициализация значений из localStorage при открытии вкладки
+  useEffect(() => {
+    try {
+      const savedStr = localStorage.getItem("semantixForm");
+      if (!savedStr) return;
+      const saved = JSON.parse(savedStr);
+      setWebsiteUrl(saved.websiteUrl || "");
+      setCompetitors(Array.isArray(saved.competitors) && saved.competitors.length ? saved.competitors : [""]);
+      if (saved.region) setRegion(saved.region);
+      setManualQueries(saved.manualQueries || "");
+      setSearchEngine(saved.searchEngine || "yandex");
+      setGroupingMethod(saved.groupingMethod || "hard");
+      setGroupingDegree(saved.groupingDegree || "3");
+      setCheckDepth(saved.checkDepth || "10");
+      setParsingMethod(saved.parsingMethod || "phrase");
+      setSuggestionsSearchEngine(saved.suggestionsSearchEngine || "yandex");
+      setParsingDepth(saved.parsingDepth || "1");
+      setStopWords(saved.stopWords || "");
+      setCityExclusions(saved.cityExclusions || "");
+      setItemsPerPage(saved.itemsPerPage || "25");
+      setSearchQuery(saved.searchQuery || "");
+      if (saved.filters) {
+        setFilters({
+          relevantPage: saved.filters.relevantPage || "",
+          group: saved.filters.group || "",
+          positionFrom: saved.filters.positionFrom || "",
+          positionTo: saved.filters.positionTo || "",
+          wFrom: saved.filters.wFrom || "",
+          wTo: saved.filters.wTo || "",
+          wQuotesFrom: saved.filters.wQuotesFrom || "",
+          wQuotesTo: saved.filters.wQuotesTo || "",
+          wNotFrom: saved.filters.wNotFrom || "",
+          wNotTo: saved.filters.wNotTo || "",
+          demandFrom: saved.filters.demandFrom || "",
+          demandTo: saved.filters.demandTo || "",
+          clicksFrom: saved.filters.clicksFrom || "",
+          clicksTo: saved.filters.clicksTo || "",
+          competition: saved.filters.competition || "",
+          commerceFrom: saved.filters.commerceFrom || "",
+          commerceTo: saved.filters.commerceTo || "",
+        });
+      }
+    } catch (e) {
+      console.error("Failed to restore Semantix form from storage", e);
+    }
+  }, []);
+
+  // Сохранение значений в localStorage при изменении
+  useEffect(() => {
+    const formState = {
+      websiteUrl,
+      competitors,
+      region,
+      manualQueries,
+      searchEngine,
+      groupingMethod,
+      groupingDegree,
+      checkDepth,
+      parsingMethod,
+      suggestionsSearchEngine,
+      parsingDepth,
+      stopWords,
+      cityExclusions,
+      itemsPerPage,
+      searchQuery,
+      filters,
+    };
+    try {
+      localStorage.setItem("semantixForm", JSON.stringify(formState));
+    } catch (e) {
+      // ignore storage errors
+    }
+  }, [
+    websiteUrl,
+    competitors,
+    region,
+    manualQueries,
+    searchEngine,
+    groupingMethod,
+    groupingDegree,
+    checkDepth,
+    parsingMethod,
+    suggestionsSearchEngine,
+    parsingDepth,
+    stopWords,
+    cityExclusions,
+    itemsPerPage,
+    searchQuery,
+    filters,
+  ]);
 
   // Основные функции
   const addCompetitor = () => {
@@ -313,7 +415,7 @@ const Semantix: React.FC = () => {
       open: true,
       title: "Подтвердите парсинг",
       description:
-        "Вы уверены, что хотите запустить парсинг ключевых слов?",
+        "Вы уверены, что хотите запустить пар��инг ключевых слов?",
       onConfirm: async () => {
         await parseKeywords({
           region,
@@ -326,16 +428,6 @@ const Semantix: React.FC = () => {
   };
 
   const handleCleaning = () => {
-    if (!websiteUrl || !region) {
-      setConfirmDialog({
-        open: true,
-        title: "Ошибка",
-        description: "Укажите адрес сайта и регион",
-        onConfirm: () => {},
-      });
-      return;
-    }
-
     setConfirmDialog({
       open: true,
       title: "Подтвердите чистку",
@@ -353,16 +445,6 @@ const Semantix: React.FC = () => {
   };
 
   const handleSearchSuggestions = () => {
-    if (!websiteUrl || !region) {
-      setConfirmDialog({
-        open: true,
-        title: "Ошибка",
-        description: "Укажите адрес сайта и регион",
-        onConfirm: () => {},
-      });
-      return;
-    }
-
     setGroupSelectionDialog({
       open: true,
       title: "Выберите группу",
@@ -395,16 +477,6 @@ const Semantix: React.FC = () => {
   };
 
   const handleFrequencies = () => {
-    if (!websiteUrl || !region) {
-      setConfirmDialog({
-        open: true,
-        title: "Ошибка",
-        description: "Укажите адрес сайта и регион",
-        onConfirm: () => {},
-      });
-      return;
-    }
-
     if (!parseW && !parseNotW && !parseWQuoted) {
       setConfirmDialog({
         open: true,
@@ -446,16 +518,6 @@ const Semantix: React.FC = () => {
   };
 
   const handleDemandClicks = () => {
-    if (!websiteUrl || !region) {
-      setConfirmDialog({
-        open: true,
-        title: "Ошибка",
-        description: "Укажите адрес сайта и регион",
-        onConfirm: () => {},
-      });
-      return;
-    }
-
     setGroupSelectionDialog({
       open: true,
       title: "Выберите группу",
@@ -484,16 +546,6 @@ const Semantix: React.FC = () => {
   };
 
   const handleCompetition = () => {
-    if (!websiteUrl || !region) {
-      setConfirmDialog({
-        open: true,
-        title: "Ошибка",
-        description: "Укажите адрес сайта и регион",
-        onConfirm: () => {},
-      });
-      return;
-    }
-
     setGroupSelectionDialog({
       open: true,
       title: "Выберите группу",
@@ -522,16 +574,6 @@ const Semantix: React.FC = () => {
   };
 
   const handleCommercialization = () => {
-    if (!websiteUrl || !region) {
-      setConfirmDialog({
-        open: true,
-        title: "Ошибка",
-        description: "Укажите адрес сайта и регион",
-        onConfirm: () => {},
-      });
-      return;
-    }
-
     setGroupSelectionDialog({
       open: true,
       title: "Выберите группу",
@@ -545,7 +587,7 @@ const Semantix: React.FC = () => {
         setConfirmDialog({
           open: true,
           title: "Подтвердите операцию",
-          description: `Проверка коммерциализации будет применена к группе "${selectedGroup}" (${groupKeywords} ключевых слов). Продолжить?`,
+          description: `Проверка коммерциализации будет пр��менена к группе "${selectedGroup}" (${groupKeywords} ключевых слов). Продолжить?`,
           onConfirm: async () => {
             await checkCommercialization({
               region,
@@ -559,21 +601,10 @@ const Semantix: React.FC = () => {
   };
 
   const handleClustering = () => {
-    if (!websiteUrl || !region) {
-      setConfirmDialog({
-        open: true,
-        title: "Ошибка",
-        description: "Укажите адрес сайта и регион",
-        onConfirm: () => {},
-      });
-      return;
-    }
-
     setConfirmDialog({
       open: true,
       title: "Подтвердите кластеризацию",
-      description:
-        "Вы уверены, что хотите выполнить кластеризацию ключевых слов? Это может занять некоторое время.",
+      description: `К кластеризации будет отправлено ${keywords.filter((k) => k.group !== "Корзина").length} ключевых слов. Продолжить?`,
       onConfirm: async () => {
         await clusterKeywords({
           region,
@@ -616,7 +647,6 @@ const Semantix: React.FC = () => {
       title: "Создание группы",
       description: `Введите название группы для ${selectedTableRows.length} выбранных строк:`,
       onConfirm: async (groupName) => {
-        if (!websiteUrl || !region) return;
         const rowIds = selectedTableRows.map((id) => parseInt(id));
         await bulkUpdateKeywordGroup(rowIds, groupName, region, websiteUrl);
         setSelectedTableRows([]);
@@ -635,23 +665,12 @@ const Semantix: React.FC = () => {
       return;
     }
 
-    if (!websiteUrl || !region) return;
     const rowIds = selectedTableRows.map((id) => parseInt(id));
     await bulkUpdateKeywordGroup(rowIds, "Корзина", region, websiteUrl);
     setSelectedTableRows([]);
   };
 
   const handleAddQueries = () => {
-    if (!websiteUrl || !region) {
-      setConfirmDialog({
-        open: true,
-        title: "Ошибка",
-        description: "Укажите адрес сайта и регион",
-        onConfirm: () => {},
-      });
-      return;
-    }
-
     if (!manualQueries.trim() && !selectedFile) {
       setConfirmDialog({
         open: true,
@@ -671,23 +690,28 @@ const Semantix: React.FC = () => {
         let fileName = "";
 
         if (selectedFile) {
-          const reader = new FileReader();
-          reader.onload = async (e) => {
-            fileContent = e.target?.result as string;
-            fileName = selectedFile.name;
+          const base64 = await new Promise<string>((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => {
+              const result = reader.result?.toString() || "";
+              resolve(result.split(",")[1] || "");
+            };
+            reader.onerror = (err) => reject(err);
+            reader.readAsDataURL(selectedFile);
+          });
+          fileContent = base64;
+          fileName = selectedFile.name;
 
-            await addManualKeywords({
-              region,
-              domain: websiteUrl,
-              keywords_text: manualQueries.trim() || undefined,
-              file_content: fileContent || undefined,
-              file_name: fileName || undefined,
-            });
+          await addManualKeywords({
+            region,
+            domain: websiteUrl,
+            keywords_text: manualQueries.trim() || undefined,
+            file_content: fileContent || undefined,
+            file_name: fileName || undefined,
+          });
 
-            setManualQueries("");
-            setSelectedFile(null);
-          };
-          reader.readAsText(selectedFile);
+          setManualQueries("");
+          setSelectedFile(null);
         } else {
           await addManualKeywords({
             region,
@@ -702,16 +726,6 @@ const Semantix: React.FC = () => {
   };
 
   const handleDownloadShortTable = async () => {
-    if (!websiteUrl || !region) {
-      setConfirmDialog({
-        open: true,
-        title: "Ошибка",
-        description: "Укажите адрес сайта и регион",
-        onConfirm: () => {},
-      });
-      return;
-    }
-
     await downloadShortTable({
       region,
       domain: websiteUrl,
@@ -722,16 +736,6 @@ const Semantix: React.FC = () => {
   };
 
   const handleDownloadFullTable = async () => {
-    if (!websiteUrl || !region) {
-      setConfirmDialog({
-        open: true,
-        title: "Ошибка",
-        description: "Укажите адрес сайта и регион",
-        onConfirm: () => {},
-      });
-      return;
-    }
-
     await downloadFullTable({
       region,
       domain: websiteUrl,
@@ -1078,20 +1082,6 @@ const Semantix: React.FC = () => {
           existingGroups={existingGroups}
         />
 
-        {/* Отображе��ие о��ибок и сообщений */}
-        {error && (
-          <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-            <p className={cn(typography.bodyText, "text-red-700")}>{error}</p>
-          </div>
-        )}
-
-        {message && (
-          <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-            <p className={cn(typography.bodyText, "text-green-700")}>
-              {message}
-            </p>
-          </div>
-        )}
 
         {/*/!* Отображение активных задач *!/*/}
         {/*{activeTasks.length > 0 && (*/}
@@ -1294,7 +1284,7 @@ const Semantix: React.FC = () => {
 
           <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-4 gap-4 mb-4">
             <Select
-              label="Поисковая система"
+              label="Поисковая си��тема"
               value={searchEngine}
               onChange={setSearchEngine}
               options={[
@@ -2169,6 +2159,33 @@ const Semantix: React.FC = () => {
             </div>
           </div>
         </div>
+      </div>
+
+      <div className="mt-6 space-y-4">
+        {activeTasks.length > 0 && (
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+            <h3 className={cn(typography.fieldLabel, "mb-3")}>Активные задачи:</h3>
+            {activeTasks.map((task) => (
+              <div key={task.id} className="mb-2">
+                <div className="flex justify-between items-center mb-1">
+                  <span className={cn(typography.bodyText)}>{task.name}</span>
+                  <span className={cn(typography.bodyText)}>{task.progress}%</span>
+                </div>
+                <ProgressBar progress={task.progress} color="red" />
+              </div>
+            ))}
+          </div>
+        )}
+        {error && (
+          <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
+            <p className={cn(typography.bodyText, "text-red-700")}>{error}</p>
+          </div>
+        )}
+        {message && (
+          <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
+            <p className={cn(typography.bodyText, "text-green-700")}>{message}</p>
+          </div>
+        )}
       </div>
     </div>
   );
