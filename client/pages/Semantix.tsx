@@ -101,7 +101,9 @@ const Semantix: React.FC = () => {
   const [itemsPerPage, setItemsPerPage] = useState("25");
   const [selectedTableRows, setSelectedTableRows] = useState<string[]>([]);
   const [sortColumn, setSortColumn] = useState<string | null>(null);
-  const [sortDirection, setSortDirection] = useState<"asc" | "desc" | null>(null);
+  const [sortDirection, setSortDirection] = useState<"asc" | "desc" | null>(
+    null,
+  );
 
   // Фильтры и поиск
   const [showFilters, setShowFilters] = useState(false);
@@ -165,15 +167,26 @@ const Semantix: React.FC = () => {
     onConfirm: () => {},
   });
 
-  // Загрузка регионов пр�� монтировании
+  // Загрузка регионов при монтировании + восстановление сохраненного региона
   useEffect(() => {
     const loadRegions = async () => {
       try {
         const response = await semantixApi.getRegions();
         if (response.success && response.regions.length > 0) {
           setAvailableRegions(response.regions);
-          // Устанавливаем первый регион из списка
-          setRegion(response.regions[0].value);
+          let savedRegion = "";
+          try {
+            const saved = localStorage.getItem("semantixForm");
+            if (saved) {
+              const parsed = JSON.parse(saved);
+              savedRegion = parsed.region || "";
+            }
+          } catch {}
+          if (savedRegion) {
+            setRegion(savedRegion);
+          } else {
+            setRegion(response.regions[0].value);
+          }
         }
       } catch (err) {
         console.error("Error loading regions:", err);
@@ -182,6 +195,157 @@ const Semantix: React.FC = () => {
 
     loadRegions();
   }, []);
+
+  // Инициализация значений из localStorage при открытии вкладки
+  useEffect(() => {
+    try {
+      const savedStr = localStorage.getItem("semantixForm");
+      if (!savedStr) return;
+      const saved = JSON.parse(savedStr);
+      setWebsiteUrl(saved.websiteUrl || "");
+      setCompetitors(
+        Array.isArray(saved.competitors) && saved.competitors.length
+          ? saved.competitors
+          : [""],
+      );
+      if (saved.region) setRegion(saved.region);
+      setManualQueries(saved.manualQueries || "");
+      setSearchEngine(saved.searchEngine || "yandex");
+      setGroupingMethod(saved.groupingMethod || "hard");
+      setGroupingDegree(saved.groupingDegree || "3");
+      setCheckDepth(saved.checkDepth || "10");
+      setParsingMethod(saved.parsingMethod || "phrase");
+      setSuggestionsSearchEngine(saved.suggestionsSearchEngine || "yandex");
+      setParsingDepth(saved.parsingDepth || "1");
+      setStopWords(saved.stopWords || "");
+      setCityExclusions(saved.cityExclusions || "");
+      setItemsPerPage(saved.itemsPerPage || "25");
+      setSearchQuery(saved.searchQuery || "");
+      if (saved.selectedServices)
+        setSelectedServices({
+          keyso: !!saved.selectedServices.keyso,
+          bukvarix: !!saved.selectedServices.bukvarix,
+          yandexMetrika: !!saved.selectedServices.yandexMetrika,
+          yandexWebmaster: !!saved.selectedServices.yandexWebmaster,
+          gsc: !!saved.selectedServices.gsc,
+        });
+      if (saved.cleaningParams)
+        setCleaningParams({
+          duplicates: !!saved.cleaningParams.duplicates,
+          numbers: !!saved.cleaningParams.numbers,
+          adult: !!saved.cleaningParams.adult,
+          stopWords: !!saved.cleaningParams.stopWords,
+          singleWords: !!saved.cleaningParams.singleWords,
+          citiesRF: !!saved.cleaningParams.citiesRF,
+          latin: !!saved.cleaningParams.latin,
+          specialChars: !!saved.cleaningParams.specialChars,
+          wordRepeats: !!saved.cleaningParams.wordRepeats,
+        });
+      if (typeof saved.allSelected === "boolean")
+        setAllSelected(saved.allSelected);
+      if (typeof saved.excludeMain === "boolean")
+        setExcludeMain(saved.excludeMain);
+      if (typeof saved.parseW === "boolean") setParseW(saved.parseW);
+      if (typeof saved.parseNotW === "boolean") setParseNotW(saved.parseNotW);
+      if (typeof saved.parseWQuoted === "boolean")
+        setParseWQuoted(saved.parseWQuoted);
+      if (typeof saved.excludePorno === "boolean")
+        setExcludePorno(saved.excludePorno);
+      if (typeof saved.excludeNews === "boolean")
+        setExcludeNews(saved.excludeNews);
+      if (typeof saved.showBasket === "boolean")
+        setShowBasket(saved.showBasket);
+      if (typeof saved.showFilters === "boolean")
+        setShowFilters(saved.showFilters);
+      if (saved.filters) {
+        setFilters({
+          relevantPage: saved.filters.relevantPage || "",
+          group: saved.filters.group || "",
+          positionFrom: saved.filters.positionFrom || "",
+          positionTo: saved.filters.positionTo || "",
+          wFrom: saved.filters.wFrom || "",
+          wTo: saved.filters.wTo || "",
+          wQuotesFrom: saved.filters.wQuotesFrom || "",
+          wQuotesTo: saved.filters.wQuotesTo || "",
+          wNotFrom: saved.filters.wNotFrom || "",
+          wNotTo: saved.filters.wNotTo || "",
+          demandFrom: saved.filters.demandFrom || "",
+          demandTo: saved.filters.demandTo || "",
+          clicksFrom: saved.filters.clicksFrom || "",
+          clicksTo: saved.filters.clicksTo || "",
+          competition: saved.filters.competition || "",
+          commerceFrom: saved.filters.commerceFrom || "",
+          commerceTo: saved.filters.commerceTo || "",
+        });
+      }
+    } catch (e) {
+      console.error("Failed to restore Semantix form from storage", e);
+    }
+  }, []);
+
+  // Сохранение значений в localStorage при изменении
+  useEffect(() => {
+    const formState = {
+      websiteUrl,
+      competitors,
+      region,
+      manualQueries,
+      searchEngine,
+      groupingMethod,
+      groupingDegree,
+      checkDepth,
+      parsingMethod,
+      suggestionsSearchEngine,
+      parsingDepth,
+      stopWords,
+      cityExclusions,
+      itemsPerPage,
+      searchQuery,
+      filters,
+      selectedServices,
+      cleaningParams,
+      allSelected,
+      excludeMain,
+      parseW,
+      parseNotW,
+      parseWQuoted,
+      excludePorno,
+      excludeNews,
+      showBasket,
+      showFilters,
+    };
+    try {
+      localStorage.setItem("semantixForm", JSON.stringify(formState));
+    } catch (e) {}
+  }, [
+    websiteUrl,
+    competitors,
+    region,
+    manualQueries,
+    searchEngine,
+    groupingMethod,
+    groupingDegree,
+    checkDepth,
+    parsingMethod,
+    suggestionsSearchEngine,
+    parsingDepth,
+    stopWords,
+    cityExclusions,
+    itemsPerPage,
+    searchQuery,
+    filters,
+    selectedServices,
+    cleaningParams,
+    allSelected,
+    excludeMain,
+    parseW,
+    parseNotW,
+    parseWQuoted,
+    excludePorno,
+    excludeNews,
+    showBasket,
+    showFilters,
+  ]);
 
   // Основные функции
   const addCompetitor = () => {
@@ -273,7 +437,7 @@ const Semantix: React.FC = () => {
       .join(",");
   };
 
-  // Получение настроек чистки
+  // Получение нас��роек чистки
   const getCleaningSettings = () => {
     return Object.entries(cleaningParams)
       .filter(([_, selected]) => selected)
@@ -312,8 +476,7 @@ const Semantix: React.FC = () => {
     setConfirmDialog({
       open: true,
       title: "Подтвердите парсинг",
-      description:
-        "Вы уверены, что хотите запустить парсинг ключевых слов?",
+      description: "Вы уверены, что хотите запустить парсинг ключевых слов?",
       onConfirm: async () => {
         await parseKeywords({
           region,
@@ -326,20 +489,11 @@ const Semantix: React.FC = () => {
   };
 
   const handleCleaning = () => {
-    if (!websiteUrl || !region) {
-      setConfirmDialog({
-        open: true,
-        title: "Ошибка",
-        description: "Укажите адрес сайта и регион",
-        onConfirm: () => {},
-      });
-      return;
-    }
-
     setConfirmDialog({
       open: true,
       title: "Подтвердите чистку",
-      description: "Вы уверены, что хотите выполнить чистку ключевых слов согласно выбранным настройкам?",
+      description:
+        "Вы уверены, что хотите выполнить чистку ключевых слов согласно выбранным настройкам?",
       onConfirm: async () => {
         await cleanKeywords({
           region,
@@ -353,16 +507,6 @@ const Semantix: React.FC = () => {
   };
 
   const handleSearchSuggestions = () => {
-    if (!websiteUrl || !region) {
-      setConfirmDialog({
-        open: true,
-        title: "Ошибка",
-        description: "Укажите адрес сайта и регион",
-        onConfirm: () => {},
-      });
-      return;
-    }
-
     setGroupSelectionDialog({
       open: true,
       title: "Выберите группу",
@@ -395,16 +539,6 @@ const Semantix: React.FC = () => {
   };
 
   const handleFrequencies = () => {
-    if (!websiteUrl || !region) {
-      setConfirmDialog({
-        open: true,
-        title: "Ошибка",
-        description: "Укажите адрес сайта и регион",
-        onConfirm: () => {},
-      });
-      return;
-    }
-
     if (!parseW && !parseNotW && !parseWQuoted) {
       setConfirmDialog({
         open: true,
@@ -446,16 +580,6 @@ const Semantix: React.FC = () => {
   };
 
   const handleDemandClicks = () => {
-    if (!websiteUrl || !region) {
-      setConfirmDialog({
-        open: true,
-        title: "Ошибка",
-        description: "Укажите адрес сайта и регион",
-        onConfirm: () => {},
-      });
-      return;
-    }
-
     setGroupSelectionDialog({
       open: true,
       title: "Выберите группу",
@@ -484,16 +608,6 @@ const Semantix: React.FC = () => {
   };
 
   const handleCompetition = () => {
-    if (!websiteUrl || !region) {
-      setConfirmDialog({
-        open: true,
-        title: "Ошибка",
-        description: "Укажите адрес сайта и регион",
-        onConfirm: () => {},
-      });
-      return;
-    }
-
     setGroupSelectionDialog({
       open: true,
       title: "Выберите группу",
@@ -522,16 +636,6 @@ const Semantix: React.FC = () => {
   };
 
   const handleCommercialization = () => {
-    if (!websiteUrl || !region) {
-      setConfirmDialog({
-        open: true,
-        title: "Ошибка",
-        description: "Укажите адрес сайта и регион",
-        onConfirm: () => {},
-      });
-      return;
-    }
-
     setGroupSelectionDialog({
       open: true,
       title: "Выберите группу",
@@ -559,21 +663,10 @@ const Semantix: React.FC = () => {
   };
 
   const handleClustering = () => {
-    if (!websiteUrl || !region) {
-      setConfirmDialog({
-        open: true,
-        title: "Ошибка",
-        description: "Укажите адрес сайта и регион",
-        onConfirm: () => {},
-      });
-      return;
-    }
-
     setConfirmDialog({
       open: true,
       title: "Подтвердите кластеризацию",
-      description:
-        "Вы уверены, что хотите выполнить кластеризацию ключевых слов? Это может занять некоторое время.",
+      description: `К кластеризации будет отправлено ${keywords.filter((k) => k.group !== "Корзина").length} ключевых слов. Продолжить?`,
       onConfirm: async () => {
         await clusterKeywords({
           region,
@@ -592,7 +685,8 @@ const Semantix: React.FC = () => {
     setConfirmDialog({
       open: true,
       title: "Подтвердите удаление",
-      description: "Вы уверены, что хотите очистить все данные? Это действие нельзя отменить.",
+      description:
+        "Вы уверены, что хотите очистить все данные? Это действие нельзя отменить.",
       variant: "destructive",
       onConfirm: async () => {
         await clearKeywords();
@@ -616,7 +710,6 @@ const Semantix: React.FC = () => {
       title: "Создание группы",
       description: `Введите название группы для ${selectedTableRows.length} выбранных строк:`,
       onConfirm: async (groupName) => {
-        if (!websiteUrl || !region) return;
         const rowIds = selectedTableRows.map((id) => parseInt(id));
         await bulkUpdateKeywordGroup(rowIds, groupName, region, websiteUrl);
         setSelectedTableRows([]);
@@ -635,23 +728,12 @@ const Semantix: React.FC = () => {
       return;
     }
 
-    if (!websiteUrl || !region) return;
     const rowIds = selectedTableRows.map((id) => parseInt(id));
     await bulkUpdateKeywordGroup(rowIds, "Корзина", region, websiteUrl);
     setSelectedTableRows([]);
   };
 
   const handleAddQueries = () => {
-    if (!websiteUrl || !region) {
-      setConfirmDialog({
-        open: true,
-        title: "Ошибка",
-        description: "Укажите адрес сайта и регион",
-        onConfirm: () => {},
-      });
-      return;
-    }
-
     if (!manualQueries.trim() && !selectedFile) {
       setConfirmDialog({
         open: true,
@@ -671,23 +753,28 @@ const Semantix: React.FC = () => {
         let fileName = "";
 
         if (selectedFile) {
-          const reader = new FileReader();
-          reader.onload = async (e) => {
-            fileContent = e.target?.result as string;
-            fileName = selectedFile.name;
+          const base64 = await new Promise<string>((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => {
+              const result = reader.result?.toString() || "";
+              resolve(result.split(",")[1] || "");
+            };
+            reader.onerror = (err) => reject(err);
+            reader.readAsDataURL(selectedFile);
+          });
+          fileContent = base64;
+          fileName = selectedFile.name;
 
-            await addManualKeywords({
-              region,
-              domain: websiteUrl,
-              keywords_text: manualQueries.trim() || undefined,
-              file_content: fileContent || undefined,
-              file_name: fileName || undefined,
-            });
+          await addManualKeywords({
+            region,
+            domain: websiteUrl,
+            keywords_text: manualQueries.trim() || undefined,
+            file_content: fileContent || undefined,
+            file_name: fileName || undefined,
+          });
 
-            setManualQueries("");
-            setSelectedFile(null);
-          };
-          reader.readAsText(selectedFile);
+          setManualQueries("");
+          setSelectedFile(null);
         } else {
           await addManualKeywords({
             region,
@@ -702,16 +789,6 @@ const Semantix: React.FC = () => {
   };
 
   const handleDownloadShortTable = async () => {
-    if (!websiteUrl || !region) {
-      setConfirmDialog({
-        open: true,
-        title: "Ошибка",
-        description: "Укажите адрес сайта и регион",
-        onConfirm: () => {},
-      });
-      return;
-    }
-
     await downloadShortTable({
       region,
       domain: websiteUrl,
@@ -722,16 +799,6 @@ const Semantix: React.FC = () => {
   };
 
   const handleDownloadFullTable = async () => {
-    if (!websiteUrl || !region) {
-      setConfirmDialog({
-        open: true,
-        title: "Ошибка",
-        description: "Укажите адрес сайта и регион",
-        onConfirm: () => {},
-      });
-      return;
-    }
-
     await downloadFullTable({
       region,
       domain: websiteUrl,
@@ -749,77 +816,80 @@ const Semantix: React.FC = () => {
       label: "Запрос",
       sortable: true,
       sortType: "string",
-      tooltip: "Поисковая фраза или ключевое слово"
+      tooltip: "Поисковая фраза или ключевое слово",
     },
     {
       key: "relevantPage",
       label: "Релевантная страница",
       sortable: true,
       sortType: "string",
-      tooltip: "URL страницы сайта, наиболее подходящей для данного запроса"
+      tooltip: "URL страницы сайта, наиболее подходящей для данного запроса",
     },
     {
       key: "group",
       label: "Группа",
       sortable: true,
       sortType: "string",
-      tooltip: "Тематическая группа запросов для удобной организации семантического ядра"
+      tooltip:
+        "Тематическая группа запросов для удобной организации семантического ядра",
     },
     {
       key: "position",
       label: "Позиция",
       sortable: true,
       sortType: "number",
-      tooltip: "Текущая позиция сайта в поисковой выдаче по данному запросу"
+      tooltip: "Текущая позиция сайта в поисковой выдаче по данному запросу",
     },
     {
       key: "w",
       label: "W",
       sortable: true,
       sortType: "number",
-      tooltip: "Количество запросов в месяц (частотность) в Яндекс.Вордстат"
+      tooltip: "Количество запросов в месяц (частотность) в Яндекс.Вордстат",
     },
     {
       key: "wQuotes",
       label: '"W"',
       sortable: true,
       sortType: "number",
-      tooltip: "Точная частотность запроса в кавычках в Яндекс.Вордстат"
+      tooltip: "Точная частотность запроса в кавычках в Яндекс.Вордстат",
     },
     {
       key: "wNot",
       label: "!W",
       sortable: true,
       sortType: "number",
-      tooltip: "Частотность с оператором ! (фиксированный порядок слов) в Яндекс.Вордстат"
+      tooltip:
+        "Частотность с оператором ! (фиксированный порядок слов) в Яндекс.Вордстат",
     },
     {
       key: "demand",
       label: "Спрос",
       sortable: true,
       sortType: "number",
-      tooltip: "Количество показов по данному запросу в месяц"
+      tooltip: "Количество показов по данному запросу в месяц",
     },
     {
       key: "clicks",
       label: "Клики",
       sortable: true,
       sortType: "number",
-      tooltip: "Примерное количество кликов по запросу в месяц"
+      tooltip: "Примерное количество кликов по запросу в месяц",
     },
     {
       key: "competition",
       label: "Конкурентность",
       sortable: true,
       sortType: "competition",
-      tooltip: "Уровень конкуренции по данному запросу (Низкая/Умеренная/Высокая)"
+      tooltip:
+        "Уровень конкуренции по данному запросу (Низкая/Умеренная/Высокая)",
     },
     {
       key: "commerce",
       label: "Коммерция",
       sortable: true,
       sortType: "number",
-      tooltip: "Показатель коммерческой направленности запроса в процентах"
+      tooltip: "Показатель коммерческой направлен��ости запроса в процентах",
     },
   ];
 
@@ -963,8 +1033,10 @@ const Semantix: React.FC = () => {
           Высокая: 3,
           "Нет данных": 0,
         };
-        const aOrder = competitionOrder[aValue as keyof typeof competitionOrder] || 0;
-        const bOrder = competitionOrder[bValue as keyof typeof competitionOrder] || 0;
+        const aOrder =
+          competitionOrder[aValue as keyof typeof competitionOrder] || 0;
+        const bOrder =
+          competitionOrder[bValue as keyof typeof competitionOrder] || 0;
         result = aOrder - bOrder;
       } else {
         const aStr = String(aValue);
@@ -1028,7 +1100,7 @@ const Semantix: React.FC = () => {
       phrase_space: "spc",
       phrase_en: "lat",
       phrase_ru: "cyr",
-      phrase_numbers: "dig"
+      phrase_numbers: "dig",
     };
     return mapping[method] || "nrm";
   };
@@ -1078,22 +1150,7 @@ const Semantix: React.FC = () => {
           existingGroups={existingGroups}
         />
 
-        {/* Отображе��ие о��ибок и сообщений */}
-        {error && (
-          <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-            <p className={cn(typography.bodyText, "text-red-700")}>{error}</p>
-          </div>
-        )}
-
-        {message && (
-          <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-            <p className={cn(typography.bodyText, "text-green-700")}>
-              {message}
-            </p>
-          </div>
-        )}
-
-        {/*/!* Отображение активных задач *!/*/}
+        {/*/!* От��бражение активных задач *!/*/}
         {/*{activeTasks.length > 0 && (*/}
         {/*  <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">*/}
         {/*    <h3 className={cn(typography.fieldLabel, "mb-3")}>*/}
@@ -1360,7 +1417,10 @@ const Semantix: React.FC = () => {
               options={[
                 { value: "phrase", label: "Фраза" },
                 { value: "phrase_space", label: "Фраза и пробел" },
-                { value: "phrase_en", label: "Фраза и английский алфавит [a-z]" },
+                {
+                  value: "phrase_en",
+                  label: "Фраза и английский алфавит [a-z]",
+                },
                 { value: "phrase_ru", label: "Фраза и русский алфавит [а-я]" },
                 { value: "phrase_numbers", label: "Фраза и цифры [0-9]" },
               ]}
@@ -2169,6 +2229,39 @@ const Semantix: React.FC = () => {
             </div>
           </div>
         </div>
+      </div>
+
+      <div className="mt-6 space-y-4">
+        {activeTasks.length > 0 && (
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+            <h3 className={cn(typography.fieldLabel, "mb-3")}>
+              Активные задачи:
+            </h3>
+            {activeTasks.map((task) => (
+              <div key={task.id} className="mb-2">
+                <div className="flex justify-between items-center mb-1">
+                  <span className={cn(typography.bodyText)}>{task.name}</span>
+                  <span className={cn(typography.bodyText)}>
+                    {task.progress}%
+                  </span>
+                </div>
+                <ProgressBar progress={task.progress} color="red" />
+              </div>
+            ))}
+          </div>
+        )}
+        {error && (
+          <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
+            <p className={cn(typography.bodyText, "text-red-700")}>{error}</p>
+          </div>
+        )}
+        {message && (
+          <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
+            <p className={cn(typography.bodyText, "text-green-700")}>
+              {message}
+            </p>
+          </div>
+        )}
       </div>
     </div>
   );

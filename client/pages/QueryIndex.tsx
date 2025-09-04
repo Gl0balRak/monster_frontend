@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { Input, Textarea, Select, Checkbox } from "@/components/forms";
 import { Button } from "@/components/buttons";
@@ -50,6 +50,57 @@ const QueryIndexPage: React.FC = () => {
   const [downloadingKeywords, setDownloadingKeywords] = useState(false);
   const [downloadingCompetitors, setDownloadingCompetitors] = useState(false);
 
+  // Восстановление значений из localStorage
+  useEffect(() => {
+    try {
+      const savedStr = localStorage.getItem("queryIndexForm");
+      if (!savedStr) return;
+      const saved = JSON.parse(savedStr);
+      setKeywordsText(saved.keywordsText || "");
+      setParsingDepth(saved.parsingDepth || "1");
+      setCompetitorTopSize(saved.competitorTopSize || "10");
+      setStopWordsText(saved.stopWordsText || "");
+      setExcludeCitiesText(saved.excludeCitiesText || "");
+      if (saved.filters) {
+        setFilters({
+          duplicates: !!saved.filters.duplicates,
+          stopWords: !!saved.filters.stopWords,
+          latin: !!saved.filters.latin,
+          numbers: !!saved.filters.numbers,
+          singleWords: !!saved.filters.singleWords,
+          symbols: !!saved.filters.symbols,
+          adult: !!saved.filters.adult,
+          citiesRF: !!saved.filters.citiesRF,
+          wordRepeats: !!saved.filters.wordRepeats,
+        });
+      }
+    } catch (e) {
+      console.error("Failed to restore QueryIndex form from storage", e);
+    }
+  }, []);
+
+  // Сохранение значений в localStorage
+  useEffect(() => {
+    const state = {
+      keywordsText,
+      parsingDepth,
+      competitorTopSize,
+      stopWordsText,
+      excludeCitiesText,
+      filters,
+    };
+    try {
+      localStorage.setItem("queryIndexForm", JSON.stringify(state));
+    } catch {}
+  }, [
+    keywordsText,
+    parsingDepth,
+    competitorTopSize,
+    stopWordsText,
+    excludeCitiesText,
+    filters,
+  ]);
+
   // API интеграция
   const {
     isLoading,
@@ -75,7 +126,7 @@ const QueryIndexPage: React.FC = () => {
     setUploadedFiles(newFiles);
   };
 
-  // Обработка изменения фильтров
+  // Обраб��тка изменения фильтров
   const handleFilterChange = (filterKey: string, checked: boolean) => {
     setFilters((prev) => ({
       ...prev,
@@ -151,8 +202,7 @@ const QueryIndexPage: React.FC = () => {
     } catch (err) {
       console.error("Export error:", err);
       alert("Ошибка при скачивании файла");
-    }
-    finally {
+    } finally {
       setDownloadingKeywords(false);
     }
   };
@@ -165,8 +215,7 @@ const QueryIndexPage: React.FC = () => {
     } catch (err) {
       console.error("Export error:", err);
       alert("Ошибка при скачивании файла");
-    }
-    finally {
+    } finally {
       setDownloadingCompetitors(false);
     }
   };
@@ -239,7 +288,6 @@ const QueryIndexPage: React.FC = () => {
     <div className="flex-1 bg-gray-0 p-6">
       <div className="max-w-[1400px] mx-auto">
         <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-
           {/* Левая панель - Входные параметры */}
           <div className="space-y-6">
             {/* Блок 1: Список слов */}
@@ -439,7 +487,8 @@ const QueryIndexPage: React.FC = () => {
                   <ProgressBar
                     progress={progress}
                     label="Прогресс парсинга"
-                    color="red" />
+                    color="red"
+                  />
                   {/*<ProgressBar*/}
                   {/**/}
                   {/*  color="red"*/}
@@ -580,7 +629,11 @@ const QueryIndexPage: React.FC = () => {
                               );
 
                               const pages = [];
-                              for (let i = adjustedStartPage; i <= endPage; i++) {
+                              for (
+                                let i = adjustedStartPage;
+                                i <= endPage;
+                                i++
+                              ) {
                                 const isActive = i === currentPage;
                                 pages.push(
                                   <Button
@@ -646,7 +699,9 @@ const QueryIndexPage: React.FC = () => {
                         </svg>
                       }
                     >
-                      {downloadingCompetitors ? "Скачивание..." : "Скачать XLSX"}
+                      {downloadingCompetitors
+                        ? "Скачивание..."
+                        : "Скачать XLSX"}
                     </Button>
                   </div>
 

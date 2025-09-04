@@ -1,8 +1,8 @@
 // client/components/auth/ProtectedRoute.jsx
 
-import React from 'react';
-import { Navigate } from 'react-router-dom';
-import { useAuth } from '../../hooks/useAuth.jsx';
+import React from "react";
+import { Navigate } from "react-router-dom";
+import { useAuth } from "../../hooks/useAuth.jsx";
 
 const ProtectedRoute = ({ children, requireAdmin = false }) => {
   const { user, isAuthenticated, loading } = useAuth();
@@ -23,7 +23,7 @@ const ProtectedRoute = ({ children, requireAdmin = false }) => {
 
   // Если требуются права админа, но их нет
   if (requireAdmin && !user?.is_admin) {
-    return <Navigate to="/dashboard" replace />;
+    return <Navigate to="/app" replace />;
   }
 
   // Если все проверки пройдены - показываем контент
