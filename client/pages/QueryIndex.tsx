@@ -50,6 +50,36 @@ const QueryIndexPage: React.FC = () => {
   const [downloadingKeywords, setDownloadingKeywords] = useState(false);
   const [downloadingCompetitors, setDownloadingCompetitors] = useState(false);
 
+  // Восстановление значений из localStorage
+  useEffect(() => {
+    try {
+      const savedStr = localStorage.getItem("queryIndexForm");
+      if (!savedStr) return;
+      const saved = JSON.parse(savedStr);
+      setKeywordsText(saved.keywordsText || "");
+      setParsingDepth(saved.parsingDepth || "1");
+      setCompetitorTopSize(saved.competitorTopSize || "10");
+      setStopWordsText(saved.stopWordsText || "");
+      setExcludeCitiesText(saved.excludeCitiesText || "");
+    } catch (e) {
+      console.error("Failed to restore QueryIndex form from storage", e);
+    }
+  }, []);
+
+  // Сохранение значений в localStorage
+  useEffect(() => {
+    const state = {
+      keywordsText,
+      parsingDepth,
+      competitorTopSize,
+      stopWordsText,
+      excludeCitiesText,
+    };
+    try {
+      localStorage.setItem("queryIndexForm", JSON.stringify(state));
+    } catch {}
+  }, [keywordsText, parsingDepth, competitorTopSize, stopWordsText, excludeCitiesText]);
+
   // API интеграция
   const {
     isLoading,
@@ -69,7 +99,7 @@ const QueryIndexPage: React.FC = () => {
     }
   };
 
-  // Удаление файла
+  // Удаление ��айла
   const removeFile = (index: number) => {
     const newFiles = uploadedFiles.filter((_, i) => i !== index);
     setUploadedFiles(newFiles);
