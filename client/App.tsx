@@ -140,6 +140,10 @@ const MainApp: React.FC = () => {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
 
+        {/* Редирект после авторизации в Яндекс/Google */}
+        <Route path="/auth/yandex/success" element={<AuthHandler />} />
+        <Route path="/auth/google/success" element={<AuthHandler />} />
+
         {/* Защищенные маршруты */}
         <Route
           path="/app/*"
