@@ -215,6 +215,33 @@ const Semantix: React.FC = () => {
       setCityExclusions(saved.cityExclusions || "");
       setItemsPerPage(saved.itemsPerPage || "25");
       setSearchQuery(saved.searchQuery || "");
+      if (saved.selectedServices) setSelectedServices({
+        keyso: !!saved.selectedServices.keyso,
+        bukvarix: !!saved.selectedServices.bukvarix,
+        yandexMetrika: !!saved.selectedServices.yandexMetrika,
+        yandexWebmaster: !!saved.selectedServices.yandexWebmaster,
+        gsc: !!saved.selectedServices.gsc,
+      });
+      if (saved.cleaningParams) setCleaningParams({
+        duplicates: !!saved.cleaningParams.duplicates,
+        numbers: !!saved.cleaningParams.numbers,
+        adult: !!saved.cleaningParams.adult,
+        stopWords: !!saved.cleaningParams.stopWords,
+        singleWords: !!saved.cleaningParams.singleWords,
+        citiesRF: !!saved.cleaningParams.citiesRF,
+        latin: !!saved.cleaningParams.latin,
+        specialChars: !!saved.cleaningParams.specialChars,
+        wordRepeats: !!saved.cleaningParams.wordRepeats,
+      });
+      if (typeof saved.allSelected === "boolean") setAllSelected(saved.allSelected);
+      if (typeof saved.excludeMain === "boolean") setExcludeMain(saved.excludeMain);
+      if (typeof saved.parseW === "boolean") setParseW(saved.parseW);
+      if (typeof saved.parseNotW === "boolean") setParseNotW(saved.parseNotW);
+      if (typeof saved.parseWQuoted === "boolean") setParseWQuoted(saved.parseWQuoted);
+      if (typeof saved.excludePorno === "boolean") setExcludePorno(saved.excludePorno);
+      if (typeof saved.excludeNews === "boolean") setExcludeNews(saved.excludeNews);
+      if (typeof saved.showBasket === "boolean") setShowBasket(saved.showBasket);
+      if (typeof saved.showFilters === "boolean") setShowFilters(saved.showFilters);
       if (saved.filters) {
         setFilters({
           relevantPage: saved.filters.relevantPage || "",
@@ -260,12 +287,21 @@ const Semantix: React.FC = () => {
       itemsPerPage,
       searchQuery,
       filters,
+      selectedServices,
+      cleaningParams,
+      allSelected,
+      excludeMain,
+      parseW,
+      parseNotW,
+      parseWQuoted,
+      excludePorno,
+      excludeNews,
+      showBasket,
+      showFilters,
     };
     try {
       localStorage.setItem("semantixForm", JSON.stringify(formState));
-    } catch (e) {
-      // ignore storage errors
-    }
+    } catch (e) {}
   }, [
     websiteUrl,
     competitors,
@@ -283,6 +319,17 @@ const Semantix: React.FC = () => {
     itemsPerPage,
     searchQuery,
     filters,
+    selectedServices,
+    cleaningParams,
+    allSelected,
+    excludeMain,
+    parseW,
+    parseNotW,
+    parseWQuoted,
+    excludePorno,
+    excludeNews,
+    showBasket,
+    showFilters,
   ]);
 
   // Основные функции
@@ -375,7 +422,7 @@ const Semantix: React.FC = () => {
       .join(",");
   };
 
-  // Получение настроек чистки
+  // Получение нас��роек чистки
   const getCleaningSettings = () => {
     return Object.entries(cleaningParams)
       .filter(([_, selected]) => selected)
@@ -415,7 +462,7 @@ const Semantix: React.FC = () => {
       open: true,
       title: "Подтвердите парсинг",
       description:
-        "Вы уверены, что хотите запустить пар��инг ключевых слов?",
+        "Вы уверены, что хотите запустить парсинг ключевых слов?",
       onConfirm: async () => {
         await parseKeywords({
           region,
@@ -587,7 +634,7 @@ const Semantix: React.FC = () => {
         setConfirmDialog({
           open: true,
           title: "Подтвердите операцию",
-          description: `Проверка коммерциализации будет пр��менена к группе "${selectedGroup}" (${groupKeywords} ключевых слов). Продолжить?`,
+          description: `Проверка коммерциализации будет применена к группе "${selectedGroup}" (${groupKeywords} ключевых слов). Продолжить?`,
           onConfirm: async () => {
             await checkCommercialization({
               region,
@@ -823,7 +870,7 @@ const Semantix: React.FC = () => {
       label: "Коммерция",
       sortable: true,
       sortType: "number",
-      tooltip: "Показатель коммерческой направленности запроса в процентах"
+      tooltip: "Показатель коммерческой направлен��ости запроса в процентах"
     },
   ];
 
@@ -1083,7 +1130,7 @@ const Semantix: React.FC = () => {
         />
 
 
-        {/*/!* Отображение активных задач *!/*/}
+        {/*/!* От��бражение активных задач *!/*/}
         {/*{activeTasks.length > 0 && (*/}
         {/*  <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">*/}
         {/*    <h3 className={cn(typography.fieldLabel, "mb-3")}>*/}
@@ -1284,7 +1331,7 @@ const Semantix: React.FC = () => {
 
           <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-4 gap-4 mb-4">
             <Select
-              label="Поисковая си��тема"
+              label="Поисковая система"
               value={searchEngine}
               onChange={setSearchEngine}
               options={[
