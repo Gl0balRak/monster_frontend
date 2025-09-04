@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { Input, Textarea, Select, Checkbox } from "@/components/forms";
 import { Button } from "@/components/buttons";
@@ -99,7 +99,7 @@ const QueryIndexPage: React.FC = () => {
     }
   };
 
-  // Удаление ��айла
+  // Удаление файла
   const removeFile = (index: number) => {
     const newFiles = uploadedFiles.filter((_, i) => i !== index);
     setUploadedFiles(newFiles);
