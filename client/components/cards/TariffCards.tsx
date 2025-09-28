@@ -89,13 +89,16 @@ export const TariffCards: React.FC<TariffCardsProps> = ({
         {tariffsToRender.map((tariff) => {
           const isSelected = selectedTariff === tariff.id;
           const isActive = tariff.isActive;
+          const isSelectedOnly = isSelected && !isActive;
           return (
             <div
               key={tariff.id}
-              className={`relative rounded-xl p-6 cursor-pointer transition-all hover:shadow-lg hover:scale-[1.02] ${
-                isSelected || isActive
+              className={`relative rounded-xl p-6 cursor-pointer transition-all hover:shadow-lg ${
+                isActive
                   ? 'bg-gradient-to-br from-red-500 to-red-600 text-white shadow-xl'
-                  : 'bg-gray-50 hover:bg-gray-100 border border-gray-200'
+                  : isSelectedOnly
+                    ? 'bg-red-0 border border-red-3 ring-1 ring-red-7'
+                    : 'bg-gray-50 hover:bg-gray-100 border border-gray-200'
               }`}
               onClick={() => handleTariffSelect(tariff.id)}
             >
@@ -108,21 +111,21 @@ export const TariffCards: React.FC<TariffCardsProps> = ({
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center space-x-3">
                   <div className={`p-2 rounded-lg ${
-                    isSelected || isActive ? 'bg-white/20' : 'bg-red-50'
+                    isActive ? 'bg-white/20' : isSelectedOnly ? 'bg-red-0' : 'bg-red-50'
                   }`}>
                     {React.cloneElement(tariff.icon as React.ReactElement, {
-                      className: `w-5 h-5 ${isSelected || isActive ? 'text-white' : 'text-red-600'}`
+                      className: `w-5 h-5 ${isActive ? 'text-white' : isSelectedOnly ? 'text-red-7' : 'text-red-600'}`
                     })}
                   </div>
                   <div>
                     <h4 className={`font-bold ${
-                      isSelected || isActive ? 'text-white' : 'text-gray-900'
+                      isActive ? 'text-white' : isSelectedOnly ? 'text-red-9' : 'text-gray-900'
                     }`}>
                       Тариф "{tariff.name}"
                     </h4>
                     {tariff.activeUntil && (
                       <p className={`text-sm ${
-                        isSelected || isActive ? 'text-white/80' : 'text-gray-600'
+                        isActive ? 'text-white/80' : isSelectedOnly ? 'text-gray-700' : 'text-gray-600'
                       }`}>
                         Активен до {tariff.activeUntil}
                       </p>
@@ -138,7 +141,7 @@ export const TariffCards: React.FC<TariffCardsProps> = ({
 
               {tariff.price && (
                 <div className={`text-2xl font-bold mb-4 ${
-                  isSelected || isActive ? 'text-white' : 'text-gray-900'
+                  isActive ? 'text-white' : isSelectedOnly ? 'text-red-9' : 'text-gray-900'
                 }`}>
                   {tariff.price}
                 </div>
@@ -148,7 +151,7 @@ export const TariffCards: React.FC<TariffCardsProps> = ({
                 <ul className="space-y-2">
                   {tariff.features.map((feature, idx) => (
                     <li key={idx} className={`text-sm flex items-center ${
-                      isSelected || isActive ? 'text-white/90' : 'text-gray-600'
+                      isActive ? 'text-white/90' : isSelectedOnly ? 'text-gray-700' : 'text-gray-600'
                     }`}>
                       <Plus className="w-4 h-4 mr-1" />
                       {feature}
