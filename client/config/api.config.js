@@ -40,6 +40,11 @@ export const API_ENDPOINTS = {
     result: `${PAYMENT_API_URL}/payment/result`,
     success: `${PAYMENT_API_URL}/payment/success`,
     fail: `${PAYMENT_API_URL}/payment/fail`,
+    tariffs: {
+      list: `${PAYMENT_API_URL}/tariffs`,
+      current: `${PAYMENT_API_URL}/tariffs/user`,
+      change: `${PAYMENT_API_URL}/tariffs/change`,
+    },
   },
   limits: {
     balance: `${PAYMENT_API_URL}/payment/balance`,
