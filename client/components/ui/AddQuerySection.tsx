@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { cn } from '@/lib/utils';
 import { commonClasses } from '@/lib/design-system';
 import { Input } from '@/components/forms';
@@ -28,6 +28,15 @@ export const AddQuerySection: React.FC<AddQuerySectionProps> = ({
   buttonClassName,
 }) => {
   const [queries, setQueries] = useState<string[]>(initialQueries);
+
+  useEffect(() => {
+    if (
+      initialQueries.length !== queries.length ||
+      initialQueries.some((q, i) => q !== queries[i])
+    ) {
+      setQueries(initialQueries);
+    }
+  }, [initialQueries]);
 
   const showButton = queries.length < maxCount;
   const countText = maxCount ? ` (до ${maxCount} шт)` : '';

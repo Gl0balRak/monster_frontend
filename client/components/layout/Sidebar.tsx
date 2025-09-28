@@ -1,6 +1,6 @@
 import React from "react";
 import { cn } from "@/lib/utils";
-import { colors, commonClasses, typography } from "@/lib/design-system";
+import { commonClasses } from "@/lib/design-system";
 import BackToTopButton from "@/components/ui/BackToTopButton.tsx";
 
 interface SidebarProps {
@@ -93,7 +93,7 @@ const CheckIcon = () => (
   </svg>
 );
 
-const DocumentIcon = () => (
+export const DocumentIcon = () => (
   <svg
     width="24"
     height="24"
@@ -225,6 +225,11 @@ const menuItems: MenuItem[] = [
       {
         id: "query-index",
         label: "Прокачка запросного индекса",
+        icon: <CheckIcon />,
+      },
+      {
+        id: "link-analyzer",
+        label: "Анализ ссылок",
         icon: <CheckIcon />,
       },
     ],

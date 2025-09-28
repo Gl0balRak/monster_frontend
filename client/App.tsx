@@ -31,6 +31,7 @@ import Admin from "./pages/Admin.tsx";
 import PlaceholderPage from "./pages/PlaceholderPage";
 import PersonalAccount from "./pages/PersonalAccount";
 import LoginPage from "./pages/LoginPage";
+import LinkAnalyzer from "@/pages/LinkAnalyzer.tsx";
 
 const queryClient = new QueryClient();
 
@@ -82,6 +83,15 @@ const MainLayout: React.FC = () => {
             description="Сервис временно недоступен"
           />
         );
+      case "link-analyzer":
+        return isServiceAvailable("link-analyzer") ? (
+          <LinkAnalyzer />
+        ) : (
+          <PlaceholderPage
+            title="Анализ ссылок"
+            description="Сервис временно недоступен"
+          />
+        );
       case "documentation":
         return (
           <PlaceholderPage
@@ -106,7 +116,7 @@ const MainLayout: React.FC = () => {
       case "telegram":
         return (
           <PlaceholderPage
-            title="Б��ог в телеграм"
+            title="Блог в телеграм"
             description="Последние новости и обновления в нашем Telegram-канале"
           />
         );
@@ -125,7 +135,11 @@ const MainLayout: React.FC = () => {
       <Header onPageChange={setCurrentPage} />
       <div className="flex">
         <Sidebar currentPage={currentPage} onPageChange={setCurrentPage} />
-        {renderPage()}
+        <div className="flex-1 min-w-0">
+          <div className="w-full max-w-[2300px] mx-auto">
+            {renderPage()}
+          </div>
+        </div>
       </div>
     </div>
   );

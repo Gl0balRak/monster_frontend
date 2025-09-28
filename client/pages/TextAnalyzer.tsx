@@ -1,13 +1,17 @@
-import React, { useState, useMemo } from "react";
-import { Input, Select, Checkbox } from "@/components/forms";
+import React, { useState, useMemo, useEffect } from "react";
+import { Input, InputURL, Select, Checkbox } from "@/components/forms";
 import { Button } from "@/components/buttons";
+import { RecalculateButton } from '@/components/buttons/RecalculateButton';
 import { AddQuerySection } from "@/components/ui/AddQuerySection";
 import { ProgressBar } from "@/components/progress_bars/ProgressBar";
 import { ResultsTable } from "@/components/tables/ResultsTable";
 import { ComparisonTable } from "@/components/tables/ComparisonTable";
 import { LSIResults } from "@/components/tables/LSIResults";
 import { KeywordsResults } from "@/components/tables/KeywordsResults";
+import { CollocationAnalysisButton } from '@/components/buttons/CollocationAnalysisButton';
+import { CollocationResults } from '@/components/tables/CollocationResults';
 import { useTextAnalyzer } from "@/hooks/useTextAnalyzer";
+import { useCollocationAnalysis } from '@/hooks/useCollocationAnalysis';
 import { HelpTooltip } from "@/components/ui/HelpTooltip";
 import { useTranslation } from 'react-i18next';
 
@@ -17,6 +21,7 @@ const TextAnalyzerPage: React.FC = () => {
     isLoading,
     progress,
     results,
+    setResults,
     error,
     lsiLoading,
     lsiProgress,
@@ -32,7 +37,20 @@ const TextAnalyzerPage: React.FC = () => {
     analyzeSinglePage,
     startLSIAnalysis,
     startKeywordsAnalysis,
+    setLsiResults,
+    setKeywordsResults,
   } = useTextAnalyzer();
+
+  // Добавляем хук для анализа коллокаций
+  const {
+    loading: collocationLoading,
+    progress: collocationProgress,
+    results: collocationResults,
+    error: collocationError,
+    startCollocationAnalysis,
+    resetCollocationResults,
+    setCollocationResults,
+  } = useCollocationAnalysis();
 
   // Состояния формы
   const [checkAI, setCheckAI] = useState(false);
@@ -48,6 +66,7 @@ const TextAnalyzerPage: React.FC = () => {
   const [region, setRegion] = useState("msk");
   const [topSize, setTopSize] = useState("10");
   const [calculateByMedian, setCalculateByMedian] = useState(false);
+  const [recalculating, setRecalculating] = useState(false);
 
   // Состояния для таблицы результатов
   const [selectedCompetitors, setSelectedCompetitors] = useState<string[]>([]);
@@ -66,6 +85,152 @@ const TextAnalyzerPage: React.FC = () => {
       fallback_used?: boolean;
     }>
   >([]);
+
+  // ✅ Загрузка state из localStorage при открытии
+  useEffect(() => {
+    try {
+      const savedStr = localStorage.getItem("textAnalyzerForm");
+      if (!savedStr) return;
+      const saved = JSON.parse(savedStr);
+
+      // --- результаты анализа ---
+      if (saved.results) {
+        setResults(saved.results);
+      }
+
+      if (saved.additionalResults) {
+        setAdditionalResults(saved.additionalResults);
+      }
+
+      // --- выбранные чекбоксы ---
+      if (saved.selectedCompetitors) {
+        setSelectedCompetitors(saved.selectedCompetitors);
+      }
+
+      // --- результаты коллокаций ---
+      if (saved.collocationResults) {
+        setCollocationResults(saved.collocationResults);
+      }
+
+      // --- остальные поля формы ---
+      if (saved.pageUrl) setPageUrl(saved.pageUrl);
+      if (saved.mainQuery) setMainQuery(saved.mainQuery);
+      if (saved.additionalQueries) setAdditionalQueries(saved.additionalQueries);
+      if (saved.excludedWords) setExcludedWords(saved.excludedWords);
+      if (typeof saved.excludePlatforms === "boolean")
+        setExcludePlatforms(saved.excludePlatforms);
+      if (typeof saved.parseArchived === "boolean")
+        setParseArchived(saved.parseArchived);
+      if (saved.searchEngine) setSearchEngine(saved.searchEngine);
+      if (saved.region) setRegion(saved.region);
+      if (saved.topSize) setTopSize(saved.topSize);
+      if (typeof saved.calculateByMedian === "boolean")
+        setCalculateByMedian(saved.calculateByMedian);
+    } catch (e) {
+      console.error("Failed to restore TextAnalyzer form", e);
+    }
+  }, []);
+
+  // ✅ Сохранение в localStorage при изменениях
+  useEffect(() => {
+    const formState = {
+      pageUrl,
+      mainQuery,
+      additionalQueries,
+      excludedWords,
+      excludePlatforms,
+      parseArchived,
+      searchEngine,
+      region,
+      topSize,
+      calculateByMedian,
+      additionalResults,
+      results,
+      selectedCompetitors,
+      collocationResults, // добавляем результаты коллокаций
+    };
+
+    try {
+      localStorage.setItem("textAnalyzerForm", JSON.stringify(formState));
+    } catch (e) {
+      console.error("Failed to save TextAnalyzer form", e);
+    }
+  }, [
+    pageUrl,
+    mainQuery,
+    additionalQueries,
+    excludedWords,
+    excludePlatforms,
+    parseArchived,
+    searchEngine,
+    region,
+    topSize,
+    calculateByMedian,
+    additionalResults,
+    results,
+    selectedCompetitors,
+    collocationResults, // добавляем в зависимости
+  ]);
+
+  // Обработчик успешного пересчёта
+  const handleRecalculateSuccess = (data: any) => {
+    console.log('✅ Обработка успешного пересчёта:', data);
+
+    try {
+      // 1. Обновляем данные "Нашего сайта" в основных результатах
+      if (data.my_page && results) {
+        const updatedResults = {
+          ...results,
+          my_page: {
+            ...results.my_page,
+            parsed_data: data.my_page.parsed_data,
+            status: data.my_page.status || 'success'
+          }
+        };
+
+        // Обновляем основные результаты
+        setResults(updatedResults);
+        console.log('📊 Обновлены данные нашего сайта:', updatedResults.my_page);
+      }
+
+      // 2. Обновляем LSI результаты если есть
+      if (data.lsi && lsiResults) {
+        const updatedLsiResults = {
+          unigrams: data.lsi.unigrams || lsiResults.unigrams,
+          bigrams: data.lsi.bigrams || lsiResults.bigrams,
+          trigrams: data.lsi.trigrams || lsiResults.trigrams
+        };
+
+        setLsiResults(updatedLsiResults);
+        console.log('📊 Обновлены LSI результаты');
+      }
+
+      // 3. Обновляем Keywords результаты если есть
+      if (data.keywords && data.keywords.table && keywordsResults) {
+        const updatedKeywordsResults = {
+          ...keywordsResults,
+          table: data.keywords.table,
+          search_engine: data.keywords.search_engine || keywordsResults.search_engine
+        };
+
+        setKeywordsResults(updatedKeywordsResults);
+        console.log('📊 Обновлены Keywords результаты');
+      }
+
+      // 4. Обновляем результаты коллокаций если есть
+      if (data.collocations) {
+        setCollocationResults(data.collocations);
+        console.log('📊 Обновлены результаты коллокаций');
+      }
+
+      // Показываем уведомление об успехе
+      alert('✅ Пересчёт завершён! Данные вашего сайта обновлены во всех таблицах.');
+
+    } catch (error) {
+      console.error('❌ Ошибка при обновлении данных:', error);
+      alert('Произошла ошибка при обновлении данных. Проверьте консоль.');
+    }
+  };
 
   // Обработчик отправки формы
   const handleGetTop = async () => {
@@ -128,10 +293,8 @@ const TextAnalyzerPage: React.FC = () => {
       const result = await analyzeSinglePage(additionalUrl);
 
       if (result.error) {
-        // Показываем ошибку пользователю
         alert(`Ошибка: ${result.error}`);
       } else {
-        // Добавляем результат в дополнительные результаты
         const newResult = {
           url: additionalUrl,
           word_count_in_a: result.word_count_in_a,
@@ -173,6 +336,20 @@ const TextAnalyzerPage: React.FC = () => {
     );
   };
 
+  // Обработчик для анализа коллокаций
+  const handleCollocationAnalysis = async () => {
+    if (!results?.my_page?.url || !mainQuery) {
+      alert('Для анализа коллокаций необходимо иметь анализ собственной страницы и основной запрос');
+      return;
+    }
+
+    await startCollocationAnalysis(
+      results.my_page.url,
+      mainQuery,
+      additionalQueries
+    );
+  };
+
   // Обработчик анализа ключевых слов
   const handleKeywordsAnalysis = async () => {
     if (!results?.my_page?.url || selectedCompetitors.length === 0) {
@@ -207,20 +384,6 @@ const TextAnalyzerPage: React.FC = () => {
     return [...mainResults, ...additionalResults];
   }, [results?.competitors, additionalResults]);
 
-  // Подготовка данных для ComparisonTable
-  const selectedResults = combinedResults.filter((result) =>
-    selectedCompetitors.includes(result.url),
-  );
-
-  const mySiteAnalysis = results?.my_page?.parsed_data
-    ? {
-        word_count_in_a: results.my_page.parsed_data.word_count_in_a,
-        word_count_outside_a: results.my_page.parsed_data.word_count_outside_a,
-        text_fragments_count: results.my_page.parsed_data.text_fragments_count,
-        total_visible_words: results.my_page.parsed_data.total_visible_words,
-      }
-    : null;
-
   // Преобразуем LSI результаты для компонента LSIResults
   const formattedLSIResults = useMemo(() => {
     console.log('LSI Results in TextAnalyzer:', lsiResults);
@@ -230,8 +393,6 @@ const TextAnalyzerPage: React.FC = () => {
       return null;
     }
 
-    // lsiResults уже имеет правильную структуру с полями unigrams, bigrams, trigrams
-    // Проверяем, что хотя бы один тип n-грамм имеет данные
     const hasData =
       (lsiResults.unigrams && lsiResults.unigrams.length > 0) ||
       (lsiResults.bigrams && lsiResults.bigrams.length > 0) ||
@@ -251,11 +412,26 @@ const TextAnalyzerPage: React.FC = () => {
     return lsiResults;
   }, [lsiResults]);
 
-  // Использование в вашей сетке:
+  // Подготовка данных для ComparisonTable
+  const selectedResults = combinedResults.filter((result) =>
+    selectedCompetitors.includes(result.url),
+  );
+
+  const mySiteAnalysis = results?.my_page?.parsed_data
+    ? {
+        word_count_in_a: results.my_page.parsed_data.word_count_in_a,
+        word_count_outside_a: results.my_page.parsed_data.word_count_outside_a,
+        text_fragments_count: results.my_page.parsed_data.text_fragments_count,
+        total_visible_words: results.my_page.parsed_data.total_visible_words,
+      }
+    : null;
+
   const helpText = `Сайты с антибот-защитой (CAPTCHA, Cloudflare, WAF) могут быть недоступны для анализа.
 Для корректной работы: добавьте наш сервис в исключения вашей системы защиты.
 User-Agent строки и IP-адреса предоставляются по запросу в техподдержке.`;
+
   const { t } = useTranslation();
+
   return (
     <div className="flex-1 bg-gray-0 p-3">
       <div className="w-full">
@@ -269,54 +445,45 @@ User-Agent строки и IP-адреса предоставляются по �
               Проверка страницы и получение ТОП результатов
             </p>
           </div>
+
           {/* Показываем ошибку если есть */}
           {error && (
             <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
               {error}
             </div>
           )}
+
           {/* Показываем LSI ошибку если есть */}
           {lsiError && (
             <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
               <strong>Ошибка LSI анализа:</strong> {lsiError}
             </div>
           )}
+
+          {/* Ошибка анализа коллокаций */}
+          {collocationError && (
+            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
+              <strong>Ошибка анализа коллокаций:</strong> {collocationError}
+            </div>
+          )}
+
           {/* Показываем Keywords ошибку если есть */}
           {keywordsError && (
             <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
               <strong>Ошибка анализа ключевых слов:</strong> {keywordsError}
             </div>
           )}
-          {/* Analysis Options */}
-          {/*
-          <div className="flex flex-wrap gap-6">
-            <Checkbox
-              label="Проверка на ИИ"
-              checked={checkAI}
-              onChange={setCheckAI}
-            />
-            <Checkbox
-              label="Проверка на орфографию"
-              checked={checkSpelling}
-              onChange={setCheckSpelling}
-            />
-            <Checkbox
-              label="Проверка уникальности"
-              checked={checkUniqueness}
-              onChange={setCheckUniqueness}
-            />
-          </div>
-          */}
+
           {/* URL and Query */}
           <div className="space-y-4">
             <div className="flex gap-4 items-start">
               <div className="flex-1">
-                <Input
-                  label="Адрес страницы"
-                  placeholder="Введите URL"
+                <InputURL
+                  type="url"
+                  label="URL сайта"
                   value={pageUrl}
                   onChange={setPageUrl}
-                  type="url"
+                  autoProtocol={true}
                   required
                 />
               </div>
@@ -342,7 +509,9 @@ User-Agent строки и IP-адреса предоставляются по �
             onChange={setAdditionalQueries}
             buttonText={t('additionalQueries.addButton')}
             placeholder={t('additionalQueries.placeholder')}
+            initialQueries={additionalQueries}
           />
+
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
             <Select
               label="Поисковая система"
@@ -395,6 +564,7 @@ User-Agent строки и IP-адреса предоставляются по �
               ]}
             />
           </div>
+
           {/* Parsing Settings */}
           <div className="space-y-4">
             <h2 className="text-lg font-bold text-black font-['Open_Sans',-apple-system,Roboto,Helvetica,sans-serif]">
@@ -431,6 +601,7 @@ User-Agent строки и IP-адреса предоставляются по �
               </Button>
             </div>
           </div>
+
           {/* Submit Button with loading state */}
           <div className="space-y-4">
             <div className="flex justify-start items-center gap-4">
@@ -465,6 +636,7 @@ User-Agent строки и IP-адреса предоставляются по �
               </div>
             )}
           </div>
+
           {/* Results Table */}
           {combinedResults.length > 0 && !isLoading && (
             <ResultsTable
@@ -480,6 +652,28 @@ User-Agent строки и IP-адреса предоставляются по �
               addingUrl={addingUrl}
             />
           )}
+
+          {/* Плавающая кнопка пересчёта - показываем только если есть результаты */}
+          {results && combinedResults.length > 0 && (
+            <RecalculateButton
+              pageUrl={pageUrl}
+              competitorData={combinedResults}
+              mainQuery={mainQuery}
+              additionalQueries={additionalQueries}
+              searchEngine={searchEngine}
+              medianMode={calculateByMedian}
+              lsiData={lsiResults}
+              keywordsData={keywordsResults?.table}
+              onSuccess={handleRecalculateSuccess}
+              onError={(error) => {
+                console.error('❌ Ошибка пересчёта:', error);
+                alert(`Ошибка пересчёта: ${error}`);
+              }}
+              disabled={isLoading || lsiLoading || keywordsLoading || collocationLoading || recalculating}
+              floating={true}
+            />
+          )}
+
           {/* Comparison Table - показываем только если есть выбранные конкуренты */}
           {selectedCompetitors.length > 0 && mySiteAnalysis && !isLoading && (
             <ComparisonTable
@@ -492,6 +686,7 @@ User-Agent строки и IP-адреса предоставляются по �
               lsiProgress={lsiProgress}
             />
           )}
+
           {/* LSI Progress Bar */}
           {lsiLoading && (
             <div className="bg-red-50 border border-red-200 rounded-lg p-4">
@@ -507,6 +702,7 @@ User-Agent строки и IP-адреса предоставляются по �
               </p>
             </div>
           )}
+
           {/* LSI Results */}
           {formattedLSIResults && !lsiLoading && (
             <LSIResults
@@ -520,6 +716,7 @@ User-Agent строки и IP-адреса предоставляются по �
               keywordsProgress={keywordsProgress}
             />
           )}
+
           {/* Keywords Progress Bar */}
           {keywordsLoading && (
             <div className="bg-red-50 border border-red-200 rounded-lg p-4">
@@ -535,6 +732,7 @@ User-Agent строки и IP-адреса предоставляются по �
               </p>
             </div>
           )}
+
           {/* Keywords Results */}
           {keywordsResults && !keywordsLoading && (
             <KeywordsResults
@@ -542,8 +740,73 @@ User-Agent строки и IP-адреса предоставляются по �
               keywordsTotalWords={keywordsResults.total_words}
               searchEngine={keywordsResults.search_engine}
               onBack={() => {
-                // Можно добавить логику возврата если нужно
                 console.log("Back to previous step");
+              }}
+            />
+          )}
+
+          {/* БЛОК АНАЛИЗА КОЛЛОКАЦИЙ - В САМОМ КОНЦЕ СТРАНИЦЫ */}
+          {/* Кнопка анализа коллокаций - показываем после Keywords анализа или LSI анализа */}
+          {(keywordsResults || formattedLSIResults) && !lsiLoading && !keywordsLoading && !collocationLoading && (
+            <div className="mt-6 p-4 bg-purple-50 rounded-lg border border-purple-200">
+              <div className="flex items-start justify-between">
+                <div className="flex-1">
+                  <h4 className="text-lg font-semibold text-gray-900 mb-2">
+                    Семантический анализ (коллокации)
+                  </h4>
+                  <p className="text-sm text-gray-600 mb-4">
+                    Анализ слов, которые часто встречаются рядом с вашими целевыми фразами.
+                    Поможет найти дополнительные LSI-слова и понять контекст использования.
+                  </p>
+                </div>
+                <CollocationAnalysisButton
+                  pageUrl={results?.my_page?.url || pageUrl}
+                  mainQuery={mainQuery}
+                  additionalQueries={additionalQueries}
+                  lsiResults={lsiResults} // Передаем LSI результаты
+                  onStart={() => {
+                    console.log('Начало анализа коллокаций');
+                  }}
+                  onSuccess={(data) => {
+                    console.log('Успешный анализ коллокаций:', data);
+                    setCollocationResults(data);
+                  }}
+                  onError={(error) => {
+                    console.error('Ошибка анализа коллокаций:', error);
+                    alert(`Ошибка анализа: ${error}`);
+                  }}
+                  disabled={collocationLoading || lsiLoading || keywordsLoading}
+                />
+              </div>
+            </div>
+          )}
+
+          {/* Progress Bar для анализа коллокаций */}
+          {collocationLoading && (
+            <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
+              <ProgressBar
+                progress={collocationProgress}
+                label="Анализ семантических связей"
+                subLabel="Поиск коллокаций и PMI анализ..."
+                showPercentage={true}
+                color="purple"
+                className="mb-2"
+              />
+              <p className="text-purple-700 text-sm">
+                Анализ может занять несколько минут в зависимости от размера страницы...
+              </p>
+            </div>
+          )}
+
+          {/* Результаты анализа коллокаций */}
+          {collocationResults && !collocationLoading && (
+            <CollocationResults
+              data={collocationResults}
+              loading={collocationLoading}
+              onBack={() => {
+                if (confirm('Вы уверены, что хотите очистить результаты коллокаций?')) {
+                  resetCollocationResults();
+                }
               }}
             />
           )}

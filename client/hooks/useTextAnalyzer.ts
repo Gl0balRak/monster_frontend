@@ -44,12 +44,13 @@ interface UseTextAnalyzerReturn {
   isLoading: boolean;
   progress: number;
   results: AnalysisResult | null;
+  setResults: (r: any) => void;
   error: string | null;
 
   // LSI State
   lsiLoading: boolean;
   lsiProgress: number;
-  lsiResults: FormattedLSIResults | null; // Изменен тип
+  lsiResults: FormattedLSIResults | null;
   lsiError: string | null;
 
   // Keywords State
@@ -94,6 +95,11 @@ interface UseTextAnalyzerReturn {
     additionalQueries: string[],
     searchEngine: string,
   ) => Promise<void>;
+
+  // Добавляем методы для обновления состояний
+  setResults: (results: AnalysisResult | null) => void;
+  setLsiResults: (results: FormattedLSIResults | null) => void;
+  setKeywordsResults: (results: KeywordsAnalysisResult | null) => void;
 }
 
 export const useTextAnalyzer = (): UseTextAnalyzerReturn => {
@@ -703,10 +709,25 @@ export const useTextAnalyzer = (): UseTextAnalyzerReturn => {
     });
   }, []);
 
+  // Добавляем методы для обновления состояний
+  const updateResults = useCallback((newResults: AnalysisResult | null) => {
+    setResults(newResults);
+  }, []);
+
+  const updateLsiResults = useCallback((newResults: FormattedLSIResults | null) => {
+    setLsiResults(newResults);
+  }, []);
+
+  const updateKeywordsResults = useCallback((newResults: KeywordsAnalysisResult | null) => {
+    setKeywordsResults(newResults);
+  }, []);
+
   return {
+    // State
     isLoading,
     progress,
     results,
+    setResults,
     error,
     lsiLoading,
     lsiProgress,
@@ -716,11 +737,18 @@ export const useTextAnalyzer = (): UseTextAnalyzerReturn => {
     keywordsProgress,
     keywordsResults,
     keywordsError,
+
+    // Actions
     startAnalysis,
     resetResults,
     loadStopWordsFromFile,
     analyzeSinglePage,
     startLSIAnalysis,
     startKeywordsAnalysis,
+
+    // Методы для обновления состояний
+    setResults: updateResults,
+    setLsiResults: updateLsiResults,
+    setKeywordsResults: updateKeywordsResults,
   };
 };

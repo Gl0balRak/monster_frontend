@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@/hooks/useAuth.jsx";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import {
@@ -68,7 +68,33 @@ export const Header: React.FC<HeaderProps> = ({ onPageChange }) => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const [userInfo, setUserInfo] = useState<any>(null);
-  const [balance] = useState(1000); // Статичный баланс пока
+  const [balance, setBalance] = useState<number | null>(null);
+
+  const fetchBalance = useCallback(async () => {
+    if (!user) return;
+    try {
+      const response = await fetch(API_ENDPOINTS.limits.balance, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setBalance(data["balance"]);
+      }
+    } catch (error) {
+      console.error("Failed to fetch user balance:", error);
+    }
+  }, [user]);
+
+  useEffect(() => {
+    fetchBalance();
+    const interval = setInterval(fetchBalance, 30000); // 30 сек
+    return () => clearInterval(interval);
+  }, [fetchBalance]);
 
   // Получаем информацию о пользователе
   useEffect(() => {
@@ -140,8 +166,19 @@ export const Header: React.FC<HeaderProps> = ({ onPageChange }) => {
 
   return (
     <header className="w-full h-[72px] bg-white border-b border-gray-2 flex items-center justify-between px-6 shadow-sm">
-      <Logo />
-
+      <div className="flex items-center justify-between px-6 gap-6">
+        <Logo />
+        <div className="flex items-center gap-2">
+          <span className="text-sm font-semibold text-gray-900 leading-tight">
+            Баланс: {balance !== null ? balance : "—"}
+          </span>
+                <RefreshCcw
+                  className="h-4 w-4 text-gray-500 cursor-pointer hover:text-gray-700"
+                  onClick={fetchBalance}
+                  title="Обновить баланс"
+                />
+        </div>
+      </div>
       <DropdownMenu>
         <DropdownMenuTrigger className="flex items-center gap-3 px-4 py-2 hover:bg-gray-1 rounded-lg transition-colors cursor-pointer">
           <Avatar className="w-8 h-8">

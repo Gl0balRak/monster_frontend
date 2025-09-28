@@ -129,6 +129,10 @@ export interface KeywordsAnalysisResult {
   error?: string;
 }
 
+// Функция для получения токена
+const getAuthToken = () => "Bearer " + localStorage.getItem("access_token");
+
+
 // Helper function for API calls
 async function apiCall<T>(endpoint: string, options?: RequestInit): Promise<T> {
   const response = await fetch(endpoint, {
@@ -156,6 +160,9 @@ export const textAnalyzerApi = {
     return apiCall<AnalysisResult>(API_ENDPOINTS.analyzer.analyzeATags, {
       method: "POST",
       body: JSON.stringify(request),
+      headers: {
+        Authorization: getAuthToken(),
+      }
     });
   },
 
@@ -178,6 +185,9 @@ export const textAnalyzerApi = {
     return apiCall<LSIAnalysisResult>(API_ENDPOINTS.analyzer.compareNgrams, {
       method: "POST",
       body: JSON.stringify(request),
+      headers: {
+        Authorization: getAuthToken(),
+      }
     });
   },
 
@@ -190,6 +200,9 @@ export const textAnalyzerApi = {
       {
         method: "POST",
         body: JSON.stringify(request),
+        headers: {
+          Authorization: getAuthToken(),
+        }
       },
     );
   },

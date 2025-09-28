@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Star, Zap, ChevronRight } from 'lucide-react';
+import { Plus, Star, Zap, ChevronRight } from 'lucide-react';
 
 interface Tariff {
   id: string;
@@ -74,7 +74,7 @@ export const TariffCards: React.FC<TariffCardsProps> = ({
         {tariffs.map((tariff) => (
           <div
             key={tariff.id}
-            className={`relative rounded-xl p-6 cursor-pointer transition-all transform hover:scale-105 ${
+            className={`relative rounded-xl p-6 cursor-pointer transition-all hover:shadow-lg hover:scale-[1.02] ${
               selectedTariff === tariff.id
                 ? 'bg-gradient-to-br from-red-500 to-red-600 text-white shadow-xl'
                 : 'bg-gray-50 hover:bg-gray-100 border border-gray-200'
@@ -122,7 +122,7 @@ export const TariffCards: React.FC<TariffCardsProps> = ({
                 <li key={idx} className={`text-sm flex items-center ${
                   selectedTariff === tariff.id ? 'text-white/90' : 'text-gray-600'
                 }`}>
-                  <ChevronRight className="w-4 h-4 mr-1" />
+                  <Plus className="w-4 h-4 mr-1" />
                   {feature}
                 </li>
               ))}

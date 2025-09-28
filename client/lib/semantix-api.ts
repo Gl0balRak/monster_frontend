@@ -1,5 +1,5 @@
 // API для работы с Семантиксом
-const API_BASE_URL = "http://localhost:7000";
+const API_BASE_URL = "http://localhost:3002";
 
 // Типы данных
 export interface SemanticQuery {

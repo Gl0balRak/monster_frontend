@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useState, useMemo } from 'react';
+import { ChevronDown, ChevronUp, ChevronsUpDown } from "lucide-react";
 import { cn } from '@/lib/utils';
 
 interface CompetitorResult {
@@ -17,6 +18,9 @@ interface MySiteAnalysis {
   text_fragments_count?: number;
   total_visible_words?: number;
 }
+
+type SortField = "url" | "word_count_in_a" | "word_count_outside_a" | "text_fragments_count" | "total_visible_words";
+type SortDirection = "asc" | "desc" | "none";
 
 interface ResultsTableProps {
   results: CompetitorResult[] | null;
@@ -45,6 +49,77 @@ export const ResultsTable: React.FC<ResultsTableProps> = ({
   onAddUrl,
   addingUrl
 }) => {
+  const [sortConfig, setSortConfig] = useState<{
+    field: SortField;
+    direction: SortDirection;
+  }>({ field: "total_visible_words", direction: "desc" });
+
+  const sortedResults = useMemo(() => {
+    if (!results) return null;
+    if (sortConfig.direction === "none") return results;
+
+    const sortableData = [...results];
+    
+    return sortableData.sort((a, b) => {
+      let aValue: any = a[sortConfig.field];
+      let bValue: any = b[sortConfig.field];
+
+      let result = 0;
+
+      if (sortConfig.field === "url") {
+        aValue = aValue || '';
+        bValue = bValue || '';
+        result = aValue.localeCompare(bValue, 'ru');
+      } else {
+        aValue = Number(aValue) || 0;
+        bValue = Number(bValue) || 0;
+        result = aValue > bValue ? 1 : aValue < bValue ? -1 : 0;
+      }
+
+      return sortConfig.direction === "asc" ? result : -result;
+    });
+  }, [results, sortConfig]);
+
+  const handleSortClick = (field: SortField) => {
+    setSortConfig(prev => {
+      if (prev.field !== field) {
+        return { field, direction: "desc" };
+      }
+      switch (prev.direction) {
+        case "none": return { field, direction: "asc" };
+        case "asc": return { field, direction: "desc" };
+        case "desc": return { field, direction: "none" };
+        default: return { field, direction: "desc" };
+      }
+    });
+  };
+
+  const getSortIcon = (field: SortField) => {
+    if (sortConfig.field !== field) {
+      return <ChevronsUpDown className="w-4 h-4 text-gray-400" />;
+    }
+    
+    switch (sortConfig.direction) {
+      case "asc": return <ChevronUp className="w-4 h-4 text-blue-600" />;
+      case "desc": return <ChevronDown className="w-4 h-4 text-blue-600" />;
+      case "none": return <ChevronsUpDown className="w-4 h-4 text-gray-400" />;
+      default: return <ChevronsUpDown className="w-4 h-4 text-gray-400" />;
+    }
+  };
+
+  const getSortTooltip = (field: SortField) => {
+    if (sortConfig.field !== field) {
+      return "Нажмите для сортировки";
+    }
+    
+    switch (sortConfig.direction) {
+      case "asc": return "Сортировка по возрастанию. Нажмите для сортировки по убыванию";
+      case "desc": return "Сортировка по убыванию. Нажмите чтобы убрать сортировку";
+      case "none": return "Сортировка отключена. Нажмите для сортировки по возрастанию";
+      default: return "Нажмите для сортировки";
+    }
+  };
+
   if (!results) return null;
 
   const hasResults = results.length > 0 || !!mySiteAnalysis;
@@ -65,9 +140,21 @@ export const ResultsTable: React.FC<ResultsTableProps> = ({
   return (
     <div className="mt-8 bg-white rounded-lg border">
       {/* Header */}
-      <div className="p-4 border-b bg-gray-50">
-        <div className="flex justify-between items-center">
-          <h3 className="font-medium">Сайты-конкуренты</h3>
+      <div className="p-4 border-b bg-gray-50 relative min-h-[64px] flex items-center">
+        <div className="flex justify-between items-center w-full">
+          <div className="flex items-center space-x-2">
+            <h3 className="font-medium">Сайты-конкуренты</h3>
+            {sortConfig.direction !== "none" && (
+              <span className="text-sm text-blue-600 bg-blue-100 px-2 py-1 rounded">
+                Сортировка: {sortConfig.field === "url" ? "по URL" : 
+                            sortConfig.field === "word_count_in_a" ? "по словам в теге <a>" :
+                            sortConfig.field === "word_count_outside_a" ? "по словам вне тега <a>" :
+                            sortConfig.field === "text_fragments_count" ? "по текстовым фрагментам" : 
+                            "по общему количеству слов"} 
+                ({sortConfig.direction === "asc" ? "↑ возр." : "↓ убыв."})
+              </span>
+            )}
+          </div>
           <div className="text-sm text-gray-600">
             {totalCount}
             {getResultsCountText()}
@@ -104,7 +191,7 @@ export const ResultsTable: React.FC<ResultsTableProps> = ({
                 <div className="text-sm text-gray-600 flex items-center gap-4">
                   <span className="flex items-center gap-1">
                     <span>📋</span>
-                    <span>- из сохраненной копии</span>
+                    <span>- из сохранённой копии</span>
                   </span>
                   <span className="flex items-center gap-1">
                     <span>↩️</span>
@@ -116,37 +203,73 @@ export const ResultsTable: React.FC<ResultsTableProps> = ({
 
             {/* Table */}
             <div className="overflow-x-auto">
-              <table className="w-full">
+              <table className="w-full table-fixed">
+                <colgroup>
+                  <col className="w-12" />
+                  <col className="min-w-[300px]" />
+                  <col className="min-w-[140px]" />
+                  <col className="min-w-[160px]" />
+                  <col className="min-w-[150px]" />
+                  <col className="min-w-[180px]" />
+                </colgroup>
                 <thead>
                   <tr className="border-b bg-gray-800 text-white">
-                    <th className="text-left py-3 px-4 font-medium w-12">
-                      <Checkbox
-                        checked={!!results && results.length > 0 && selectedCompetitors.length === results.length}
-                        onChange={onSelectAll}
-                        variant="table-header"
-                      />
+                    <th className="text-left py-3 px-4 font-medium w-12"></th>
+                    <th 
+                      className="text-left py-3 px-4 font-medium cursor-pointer hover:bg-gray-700 transition-colors"
+                      onClick={() => handleSortClick('url')}
+                      title={getSortTooltip('url')}
+                    >
+                      <div className="flex items-center gap-2 truncate">
+                        Конкурент
+                        {getSortIcon('url')}
+                      </div>
                     </th>
-                    <th className="text-left py-3 px-4 font-medium min-w-[300px]">
-                      Конкурент
+                    <th 
+                      className="text-center py-3 px-4 font-medium cursor-pointer hover:bg-gray-700 transition-colors"
+                      onClick={() => handleSortClick('word_count_in_a')}
+                      title={getSortTooltip('word_count_in_a')}
+                    >
+                      <div className="flex items-center gap-2 justify-center truncate">
+                        Слова в теге &lt;a&gt;
+                        {getSortIcon('word_count_in_a')}
+                      </div>
                     </th>
-                    <th className="text-center py-3 px-4 font-medium min-w-[140px]">
-                      Слова в теге &lt;a&gt;
+                    <th 
+                      className="text-center py-3 px-4 font-medium cursor-pointer hover:bg-gray-700 transition-colors"
+                      onClick={() => handleSortClick('word_count_outside_a')}
+                      title={getSortTooltip('word_count_outside_a')}
+                    >
+                      <div className="flex items-center gap-2 justify-center truncate">
+                        Слова вне тега &lt;a&gt;
+                        {getSortIcon('word_count_outside_a')}
+                      </div>
                     </th>
-                    <th className="text-center py-3 px-4 font-medium min-w-[160px]">
-                      Слова вне тега &lt;a&gt;
+                    <th 
+                      className="text-center py-3 px-4 font-medium cursor-pointer hover:bg-gray-700 transition-colors"
+                      onClick={() => handleSortClick('text_fragments_count')}
+                      title={getSortTooltip('text_fragments_count')}
+                    >
+                      <div className="flex items-center gap-2 justify-center truncate">
+                        Текстовые фрагменты
+                        {getSortIcon('text_fragments_count')}
+                      </div>
                     </th>
-                    <th className="text-center py-3 px-4 font-medium min-w-[150px]">
-                      Текстовые фрагменты
-                    </th>
-                    <th className="text-center py-3 px-4 font-medium min-w-[180px]">
-                      Общее количество слов
+                    <th 
+                      className="text-center py-3 px-4 font-medium cursor-pointer hover:bg-gray-700 transition-colors"
+                      onClick={() => handleSortClick('total_visible_words')}
+                      title={getSortTooltip('total_visible_words')}
+                    >
+                      <div className="flex items-center gap-2 justify-center truncate">
+                        Общее количество слов
+                        {getSortIcon('total_visible_words')}
+                      </div>
                     </th>
                   </tr>
                 </thead>
                 <tbody>
-                  {/* Our Site Row */}
                   {mySiteAnalysis && (
-                    <tr className="border-b bg-blue-50">
+                    <tr key="our-site" className="border-b hover:bg-gray-50 transition-colors">
                       <td className="py-3 px-4">{/* Empty cell for checkbox */}</td>
                       <td className="py-3 px-4 text-sm font-medium text-blue-800">
                         Наш сайт
@@ -166,8 +289,7 @@ export const ResultsTable: React.FC<ResultsTableProps> = ({
                     </tr>
                   )}
 
-                  {/* Competitor Rows */}
-                  {results?.map((result, index) => (
+                  {sortedResults?.map((result, index) => (
                     <tr key={index} className="border-b hover:bg-gray-50 transition-colors">
                       <td className="py-3 px-4">
                         <Checkbox
@@ -192,7 +314,7 @@ export const ResultsTable: React.FC<ResultsTableProps> = ({
                             {result.parsed_from === 'saved_copy' && (
                               <span
                                 className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-yellow-100 text-yellow-800"
-                                title="Данные из сохраненной копии"
+                                title="Данные из сохранённой копии"
                               >
                                 📋
                               </span>

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { cn } from "@/lib/utils";
-import { Input, Textarea, Select, Checkbox } from "@/components/forms";
+import { Input, Textarea, Select, Checkbox, InputURL } from "@/components/forms";
 import { Button, IconButton, ActionButton } from "@/components/buttons";
 import { FileUpload } from "@/components/ui/FileUpload";
 import {
@@ -889,7 +889,7 @@ const Semantix: React.FC = () => {
       label: "Коммерция",
       sortable: true,
       sortType: "number",
-      tooltip: "Показатель коммерческой направлен��ости запроса в процентах",
+      tooltip: "Показатель коммерческой направленности запроса в процентах",
     },
   ];
 
@@ -1105,6 +1105,8 @@ const Semantix: React.FC = () => {
     return mapping[method] || "nrm";
   };
 
+
+
   return (
     <div className="flex-1 bg-gray-0 p-6">
       <div className="max-w-7xl mx-auto space-y-6">
@@ -1177,12 +1179,14 @@ const Semantix: React.FC = () => {
           </h2>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
-            <Input
+            <InputURL
+              type="url"
               label="Адрес сайта"
               required
               placeholder="https://example.com"
               value={websiteUrl}
               onChange={setWebsiteUrl}
+              autoProtocol={true}// Включаем автоматическое добавление протокола
             />
             <Select
               label="Регион"
@@ -1203,10 +1207,12 @@ const Semantix: React.FC = () => {
               {competitors.map((competitor, index) => (
                 <div key={index} className="flex gap-2 lg:w-1/2">
                   <div className="flex-1">
-                    <Input
+                    <InputURL
+                      type="url"
                       placeholder={`https://competitor${index + 1}.com`}
                       value={competitor}
                       onChange={(value) => updateCompetitor(index, value)}
+                      autoProtocol={true}// Включаем автоматическое добавление протокола
                     />
                   </div>
                   {competitors.length > 1 && (
@@ -1815,7 +1821,20 @@ const Semantix: React.FC = () => {
           </div>
         </div>
 
-        {/* А��тивные задачи */}
+        {/* Сообщения */}
+        {error && (
+          <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
+            <p className={cn(typography.bodyText, "text-red-700")}>{error}</p>
+          </div>
+        )}
+        {message && (
+          <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
+            <p className={cn(typography.bodyText, "text-green-700")}>
+              {message}
+            </p>
+          </div>
+        )}
+        {/* Активные задачи */}
         {activeTasks.length > 0 && (
           <div className="bg-white rounded-lg p-6">
             <h3 className={cn(typography.fieldLabel, "mb-4")}>
@@ -1838,6 +1857,7 @@ const Semantix: React.FC = () => {
             </div>
           </div>
         )}
+
 
         {/* 8. Блок «Управление таблицей» */}
         <div className="bg-white rounded-lg p-6">
@@ -2232,36 +2252,7 @@ const Semantix: React.FC = () => {
       </div>
 
       <div className="mt-6 space-y-4">
-        {activeTasks.length > 0 && (
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-            <h3 className={cn(typography.fieldLabel, "mb-3")}>
-              Активные задачи:
-            </h3>
-            {activeTasks.map((task) => (
-              <div key={task.id} className="mb-2">
-                <div className="flex justify-between items-center mb-1">
-                  <span className={cn(typography.bodyText)}>{task.name}</span>
-                  <span className={cn(typography.bodyText)}>
-                    {task.progress}%
-                  </span>
-                </div>
-                <ProgressBar progress={task.progress} color="red" />
-              </div>
-            ))}
-          </div>
-        )}
-        {error && (
-          <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
-            <p className={cn(typography.bodyText, "text-red-700")}>{error}</p>
-          </div>
-        )}
-        {message && (
-          <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
-            <p className={cn(typography.bodyText, "text-green-700")}>
-              {message}
-            </p>
-          </div>
-        )}
+
       </div>
     </div>
   );

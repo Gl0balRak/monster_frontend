@@ -1,4 +1,5 @@
-import React from 'react';
+import React, {useState, useMemo} from 'react';
+import { ChevronDown, ChevronUp, ChevronsUpDown } from "lucide-react";
 import { cn } from '@/lib/utils';
 import { ProgressIndicator } from "@/components/progress_bars/ProgressIndicator";
 
@@ -27,6 +28,9 @@ interface ComparisonTableProps {
   lsiProgress: number;
 }
 
+type SortField = "url" | "word_count_in_a" | "word_count_outside_a" | "text_fragments_count" | "total_visible_words";
+type SortDirection = "asc" | "desc" | "none";
+
 export const ComparisonTable: React.FC<ComparisonTableProps> = ({
   results,
   selectedCompetitors,
@@ -36,6 +40,12 @@ export const ComparisonTable: React.FC<ComparisonTableProps> = ({
   lsiLoading,
   lsiProgress
 }) => {
+
+  const [sortConfig, setSortConfig] = useState<{
+    field: SortField;
+    direction: SortDirection;
+  }>({ field: "total_visible_words", direction: "desc" });
+
   if (!selectedCompetitors.length || !mySiteAnalysis || !results) {
     return null;
   }
@@ -45,6 +55,71 @@ export const ComparisonTable: React.FC<ComparisonTableProps> = ({
   );
   
   if (selectedResults.length === 0) return null;
+
+  const sortedResults = useMemo(() => {
+    if (sortConfig.direction === "none") return selectedResults;
+
+    const sortableData = [...selectedResults];
+    
+    return sortableData.sort((a, b) => {
+      let aValue: any = a[sortConfig.field];
+      let bValue: any = b[sortConfig.field];
+
+      let result = 0;
+
+      if (sortConfig.field === "url") {
+        aValue = aValue || '';
+        bValue = bValue || '';
+        result = aValue.localeCompare(bValue, 'ru');
+      } else {
+        aValue = Number(aValue) || 0;
+        bValue = Number(bValue) || 0;
+        result = aValue > bValue ? 1 : aValue < bValue ? -1 : 0;
+      }
+
+      return sortConfig.direction === "asc" ? result : -result;
+    });
+  }, [selectedResults, sortConfig]);
+
+  const handleSortClick = (field: SortField) => {
+    setSortConfig(prev => {
+      if (prev.field !== field) {
+        return { field, direction: "desc" };
+      }
+      switch (prev.direction) {
+        case "none": return { field, direction: "asc" };
+        case "asc": return { field, direction: "desc" };
+        case "desc": return { field, direction: "none" };
+        default: return { field, direction: "desc" };
+      }
+    });
+  };
+
+  const getSortIcon = (field: SortField) => {
+    if (sortConfig.field !== field) {
+      return <ChevronsUpDown className="w-4 h-4 text-gray-400" />;
+    }
+    
+    switch (sortConfig.direction) {
+      case "asc": return <ChevronUp className="w-4 h-4 text-blue-600" />;
+      case "desc": return <ChevronDown className="w-4 h-4 text-blue-600" />;
+      case "none": return <ChevronsUpDown className="w-4 h-4 text-gray-400" />;
+      default: return <ChevronsUpDown className="w-4 h-4 text-gray-400" />;
+    }
+  };
+
+  const getSortTooltip = (field: SortField) => {
+    if (sortConfig.field !== field) {
+      return "Нажмите для сортировки";
+    }
+    
+    switch (sortConfig.direction) {
+      case "asc": return "Сортировка по возрастанию. Нажмите для сортировки по убыванию";
+      case "desc": return "Сортировка по убыванию. Нажмите чтобы убрать сортировку";
+      case "none": return "Сортировка отключена. Нажмите для сортировки по возрастанию";
+      default: return "Нажмите для сортировки";
+    }
+  };
 
   // Функции для расчета медианы и среднего
   const calculateMedian = (values: number[]): number => {
@@ -98,11 +173,25 @@ export const ComparisonTable: React.FC<ComparisonTableProps> = ({
 
   return (
     <div className="mt-8 bg-white rounded-lg border">
-      <div className="p-4 border-b bg-gray-50">
-        <h3 className="font-medium">Этап оптимизации</h3>
-        <p className="text-sm text-gray-600 mt-1">
-          Не стремитесь сразу сделать 100%, чтобы осталось место для добавления слов, задающих тематику (LSI)
-        </p>
+      <div className="p-4 border-b bg-gray-50 relative min-h-[64px] flex items-center">
+        <div className="flex justify-between items-center w-full">
+          <div className="flex items-center space-x-2">
+            <h3 className="font-medium">Этап оптимизации</h3>
+            {sortConfig.direction !== "none" && (
+              <span className="text-sm text-blue-600 bg-blue-100 px-2 py-1 rounded">
+                Сортировка: {sortConfig.field === "url" ? "по URL" : 
+                            sortConfig.field === "word_count_in_a" ? "по словам в теге <a>" :
+                            sortConfig.field === "word_count_outside_a" ? "по словам вне тега <a>" :
+                            sortConfig.field === "text_fragments_count" ? "по текстовым фрагментам" : 
+                            "по общему количеству слов"} 
+                ({sortConfig.direction === "asc" ? "↑ возр." : "↓ убыв."})
+              </span>
+            )}
+          </div>
+          <p className="text-sm text-gray-600">
+            Не стремитесь сразу сделать 100%, чтобы осталось место для добавления слов, задающих тематику (LSI)
+          </p>
+        </div>
       </div>
 
       <div className="p-4">
@@ -110,20 +199,60 @@ export const ComparisonTable: React.FC<ComparisonTableProps> = ({
           <table className="w-full">
             <thead>
               <tr className="border-b bg-gray-800 text-white">
-                <th className="text-left py-3 px-4 font-medium" style={{ width: '200px' }}>
-                  Конкурент
+                <th 
+                  className="text-left py-3 px-4 font-medium cursor-pointer hover:bg-gray-700 transition-colors"
+                  style={{ width: '200px' }}
+                  onClick={() => handleSortClick('url')}
+                  title={getSortTooltip('url')}
+                >
+                  <div className="flex items-center gap-2 truncate">
+                    Конкурент
+                    {getSortIcon('url')}
+                  </div>
                 </th>
-                <th className="text-center py-3 px-4 font-medium" style={{ width: '150px' }}>
-                  Слова в теге &lt;a&gt;
+                <th 
+                  className="text-center py-3 px-4 font-medium cursor-pointer hover:bg-gray-700 transition-colors"
+                  style={{ width: '150px' }}
+                  onClick={() => handleSortClick('word_count_in_a')}
+                  title={getSortTooltip('word_count_in_a')}
+                >
+                  <div className="flex items-center gap-2 justify-center truncate">
+                    Слова в теге &lt;a&gt;
+                    {getSortIcon('word_count_in_a')}
+                  </div>
                 </th>
-                <th className="text-center py-3 px-4 font-medium" style={{ width: '180px' }}>
-                  Слова вне тега &lt;a&gt;
+                <th 
+                  className="text-center py-3 px-4 font-medium cursor-pointer hover:bg-gray-700 transition-colors"
+                  style={{ width: '180px' }}
+                  onClick={() => handleSortClick('word_count_outside_a')}
+                  title={getSortTooltip('word_count_outside_a')}
+                >
+                  <div className="flex items-center gap-2 justify-center truncate">
+                    Слова вне тега &lt;a&gt;
+                    {getSortIcon('word_count_outside_a')}
+                  </div>
                 </th>
-                <th className="text-center py-3 px-4 font-medium" style={{ width: '180px' }}>
-                  Текстовые фрагменты
+                <th 
+                  className="text-center py-3 px-4 font-medium cursor-pointer hover:bg-gray-700 transition-colors"
+                  style={{ width: '180px' }}
+                  onClick={() => handleSortClick('text_fragments_count')}
+                  title={getSortTooltip('text_fragments_count')}
+                >
+                  <div className="flex items-center gap-2 justify-center truncate">
+                    Текстовые фрагменты
+                    {getSortIcon('text_fragments_count')}
+                  </div>
                 </th>
-                <th className="text-center py-3 px-4 font-medium" style={{ width: '200px' }}>
-                  Общее количество слов
+                <th 
+                  className="text-center py-3 px-4 font-medium cursor-pointer hover:bg-gray-700 transition-colors"
+                  style={{ width: '200px' }}
+                  onClick={() => handleSortClick('total_visible_words')}
+                  title={getSortTooltip('total_visible_words')}
+                >
+                  <div className="flex items-center gap-2 justify-center truncate">
+                    Общее количество слов
+                    {getSortIcon('total_visible_words')}
+                  </div>
                 </th>
               </tr>
             </thead>
@@ -146,7 +275,7 @@ export const ComparisonTable: React.FC<ComparisonTableProps> = ({
                 </td>
               </tr>
 
-              {selectedResults.map((result, index) => (
+              {sortedResults.map((result, index) => (
                 <tr key={index} className="border-b hover:bg-gray-50">
                   <td className="py-3 px-4 text-sm">
                     <a

@@ -3,6 +3,7 @@
 // Используем import.meta.env для Vite вместо process.env
 const AUTH_API_URL = 'http://127.0.0.1:3001';
 const ANALYZER_API_URL = 'http://127.0.0.1:3001';
+const PAYMENT_API_URL = 'http://127.0.0.1:3001';
 
 export const API_ENDPOINTS = {
   // Auth endpoints (порт 1001)
@@ -31,7 +32,19 @@ export const API_ENDPOINTS = {
     // Анализ ключевых слов
     keywordsAnalyzeFull: `${ANALYZER_API_URL}/analyzer/keywords/analyze-full`,
     countWordsAverage: `${ANALYZER_API_URL}/analyzer/keywords/count-words-average`,
+    recalculate_src: `${ANALYZER_API_URL}/analyzer/recalculate-src`,
+    recalculate_progress: `${ANALYZER_API_URL}/analyzer/recalculate-src-progress`,
   },
+  payment: {
+    create_payment: `${PAYMENT_API_URL}/payment/create_payment`,
+    result: `${PAYMENT_API_URL}/payment/result`,
+    success: `${PAYMENT_API_URL}/payment/success`,
+    fail: `${PAYMENT_API_URL}/payment/fail`,
+  },
+  limits: {
+    balance: `${PAYMENT_API_URL}/payment/balance`,
+    transactionHistory: `${PAYMENT_API_URL}/payment/operations-log`
+  }
 };
 
-export { AUTH_API_URL, ANALYZER_API_URL };
+export { AUTH_API_URL, ANALYZER_API_URL, PAYMENT_API_URL };

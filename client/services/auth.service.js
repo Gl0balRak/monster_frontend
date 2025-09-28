@@ -8,6 +8,40 @@ class AuthService {
     this.refreshToken = localStorage.getItem('refresh_token');
   }
 
+  // Универсальная функция для извлечения сообщения об ошибке
+  extractErrorMessage(errorData) {
+    if (typeof errorData === 'string') {
+      return errorData;
+    }
+
+    if (typeof errorData === 'object' && errorData) {
+      // Для объекта с message и errors (ваш формат валидации пароля)
+      if (errorData.message) {
+        let msg = errorData.message;
+        if (errorData.errors && Array.isArray(errorData.errors)) {
+          msg += '\n' + errorData.errors.join('\n');  // <-- Вот эта строка
+        }
+        return msg;
+      }
+
+      // Для массива ошибок (стандартный FastAPI validation)
+      if (Array.isArray(errorData)) {
+        return errorData.map(err => {
+          if (err.msg) return err.msg;
+          if (err.message) return err.message;
+          return JSON.stringify(err);
+        }).join('\\n');
+      }
+
+      // Если есть поле detail
+      if (errorData.detail) {
+        return this.extractErrorMessage(errorData.detail);
+      }
+    }
+
+    return 'Произошла неизвестная ошибка';
+  }
+
   // Получить заголовки для запросов
   getHeaders(includeAuth = false) {
     const headers = {
@@ -52,14 +86,20 @@ class AuthService {
       });
 
       if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.detail || 'Registration failed');
+        const errorData = await response.json().catch(() => ({}));
+        const errorMessage = this.extractErrorMessage(errorData);
+        throw new Error(errorMessage);
       }
 
       return await response.json();
     } catch (error) {
       console.error('Registration error:', error);
-      throw error;
+      // Если это уже наша обработанная ошибка, пробрасываем как есть
+      if (error.message && typeof error.message === 'string') {
+        throw error;
+      }
+      // Если это какая-то другая ошибка (сетевая и т.д.)
+      throw new Error('Ошибка соединения с сервером');
     }
   }
 
@@ -76,8 +116,9 @@ class AuthService {
       });
 
       if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.detail || 'Login failed');
+        const errorData = await response.json().catch(() => ({}));
+        const errorMessage = this.extractErrorMessage(errorData);
+        throw new Error(errorMessage);
       }
 
       const data = await response.json();
@@ -89,7 +130,12 @@ class AuthService {
       return data;
     } catch (error) {
       console.error('Login error:', error);
-      throw error;
+      // Если это уже наша обработанная ошибка, пробрасываем как есть
+      if (error.message && typeof error.message === 'string') {
+        throw error;
+      }
+      // Если это какая-то другая ошибка (сетевая и т.д.)
+      throw new Error('Ошибка соединения с сервером');
     }
   }
 
@@ -182,14 +228,20 @@ class AuthService {
       });
 
       if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.detail || 'Password change failed');
+        const errorData = await response.json().catch(() => ({}));
+        const errorMessage = this.extractErrorMessage(errorData);
+        throw new Error(errorMessage);
       }
 
       return await response.json();
     } catch (error) {
       console.error('Change password error:', error);
-      throw error;
+      // Если это уже наша обработанная ошибка, пробрасываем как есть
+      if (error.message && typeof error.message === 'string') {
+        throw error;
+      }
+      // Если это какая-то другая ошибка (сетевая и т.д.)
+      throw new Error('Ошибка соединения с сервером');
     }
   }
 

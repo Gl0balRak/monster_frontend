@@ -1,10 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { cn } from '@/lib/utils';
 import { ExportToXLSX } from '@/components/ExportToXLSX';
+import { ChevronDown, ChevronUp, ChevronsUpDown } from 'lucide-react';
 
 type SearchEngine = 'google' | 'yandex';
 type PerPageOption = number | 'all';
 type TagType = 'title' | 'body' | 'a' | 'text-fragment' | 'plain-text' | 'textfragment';
+type SortField = "diff";
 
 interface KeywordRowSection {
   title?: number;
@@ -54,9 +56,117 @@ export const KeywordsComparisonTable: React.FC<KeywordsComparisonTableProps> = (
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [perPage, setPerPage] = useState<PerPageOption>(10);
   const [showButton, setShowButton] = useState<boolean>(false);
+  const [hoveredRow, setHoveredRow] = useState<number | null>(null);
+  const [hoveredCol, setHoveredCol] = useState<number | null>(null);
+  const [sortConfig, setSortConfig] = useState({
+    field: "phrases",
+    direction: "asc"
+  });
+
+  const sortedData = useMemo(() => {
+    if(sortConfig.direction === "none") return data;
+
+    const sortableData = [...data];
+    
+    return sortableData.sort((a, b) => {
+      let aValue: any = a.phrase;
+      let bValue: any = b.phrase;
+
+      if (sortConfig.field === "diff") {
+        aValue = Object.keys(a.diff || {})
+                  .reduce((acc, key) => acc + Math.abs(a.diff[key]), 0);
+        
+        bValue = Object.keys(b.diff || {})
+                  .reduce((acc, key) => acc + Math.abs(b.diff[key]), 0);
+      }
+
+      let result = 0;
+
+      if (sortConfig.field === "phrases") {
+        result = aValue.localeCompare(bValue, 'ru');
+      } else {
+        aValue = Number(aValue) || 0;
+        bValue = Number(bValue) || 0;
+        result = aValue > bValue ? 1 : aValue < bValue ? -1 : 0;
+      }
+
+      return sortConfig.direction === "asc" ? result : -result;
+    });
+  }, [data, sortConfig]);
+
+  const handleSortClick = (field: SortField) => {
+    setSortConfig(prev => {
+      if (prev.field !== field) {
+        return { field, direction: "asc" };
+      }
+      switch (prev.direction) {
+        case "none":
+          return { field, direction: "asc" };
+        case "asc":
+          return { field, direction: "desc" };
+        case "desc":
+          return { field, direction: "none" };
+        default:
+          return prev;
+      }
+    });
+  };
+
+  const getSortIcon = (field: SortField) => {
+    if (sortConfig.field !== field) {
+      return <ChevronsUpDown className="w-4 h-4 text-gray-400" />;
+    }
+
+    switch (sortConfig.direction) {
+      case "asc":
+        return <ChevronUp className="w-4 h-4 text-blue-600" />;
+      case "desc":
+        return <ChevronDown className="w-4 h-4 text-blue-600" />;
+      case "none":
+        return <ChevronsUpDown className="w-4 h-4 text-gray-400" />;
+      default:
+        return <ChevronsUpDown className="w-4 h-4 text-gray-400" />;
+    }
+  };
+
+  const getSortTooltip = (field: SortField) => {
+    if (sortConfig.field !== field) {
+      return "Нажмите для сортировки";
+    }
+    
+    switch (sortConfig.direction) {
+      case "asc": return "Сортировка по возрастанию. Нажмите для сортировки по убыванию";
+      case "desc": return "Сортировка по убыванию. Нажмите чтобы убрать сортировку";
+      case "none": return "Сортировка отключена. Нажмите для сортировки по возрастанию";
+      default: return "Нажмите для сортировки";
+    }
+  };
+
+  // Настройки прозрачности для hover эффектов
+  const HOVER_OPACITY = {
+    header: 0.15,
+    cell: 0.1,
+    diffCell: 0.25,
+    row: 0.1,
+    rowAnomalous: 0.2
+  };
+
+  // Настройки цветов для hover эффектов
+  const HOVER_COLORS = {
+    yellow: { r: 254, g: 240, b: 138 },    // желтый (по умолчанию)
+    blue: { r: 147, g: 197, b: 253 },      // голубой
+    green: { r: 167, g: 243, b: 208 },     // зеленый
+    purple: { r: 196, g: 181, b: 253 },    // фиолетовый
+    orange: { r: 251, g: 191, b: 36 },     // оранжевый
+    pink: { r: 251, g: 207, b: 232 },      // розовый
+    gray: { r: 209, g: 213, b: 219 }       // серый
+  };
+
+  // Выберите нужный цвет
+  const ACTIVE_HOVER_COLOR = HOVER_COLORS.gray; // меняйте здесь
 
   const totalPages = perPage === 'all' ? 1 : Math.ceil(data.length / perPage);
-  const currentData = perPage === 'all' ? data : data.slice((currentPage - 1) * perPage, currentPage * perPage);
+  const currentData = perPage === 'all' ? sortedData : sortedData.slice((currentPage - 1) * perPage, currentPage * perPage);
 
   // Определяем какие колонки показывать в зависимости от поисковой системы
   const isGoogle = searchEngine === 'google';
@@ -102,12 +212,62 @@ export const KeywordsComparisonTable: React.FC<KeywordsComparisonTableProps> = (
     return pages;
   };
 
+  // Функция для смешивания цветов hover и diff
+  const blendColors = (
+    baseColor: string,
+    isHighlighted: boolean,
+    opacity: number,
+    overlayColor: { r: number; g: number; b: number } = ACTIVE_HOVER_COLOR
+  ): string => {
+    if (!isHighlighted) return baseColor;
+    if (!baseColor) return `rgba(${overlayColor.r}, ${overlayColor.g}, ${overlayColor.b}, ${opacity})`;
+
+    // Извлекаем значения rgba из baseColor
+    const rgbaMatch = baseColor.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([\d.]+))?\)/);
+    if (rgbaMatch) {
+      const [, r, g, b, a = '1'] = rgbaMatch;
+      const baseAlpha = parseFloat(a);
+
+      // Смешиваем с переданным overlay цветом
+      const overlayAlpha = opacity;
+
+      // Формула смешивания цветов
+      const finalAlpha = overlayAlpha + baseAlpha * (1 - overlayAlpha);
+      const finalR = Math.round((overlayColor.r * overlayAlpha + parseInt(r) * baseAlpha * (1 - overlayAlpha)) / finalAlpha);
+      const finalG = Math.round((overlayColor.g * overlayAlpha + parseInt(g) * baseAlpha * (1 - overlayAlpha)) / finalAlpha);
+      const finalB = Math.round((overlayColor.b * overlayAlpha + parseInt(b) * baseAlpha * (1 - overlayAlpha)) / finalAlpha);
+
+      return `rgba(${finalR}, ${finalG}, ${finalB}, ${finalAlpha})`;
+    }
+
+    // Fallback - просто overlay
+    return `rgba(${overlayColor.r}, ${overlayColor.g}, ${overlayColor.b}, ${opacity})`;
+  };
+
   // Функция для определения цвета ячейки
   const getDiffCellColor = (value: number): string => {
     if (value === 0) return '';
+
     const absValue = Math.abs(value);
     const intensity = Math.min(absValue * 15, 80);
-    return `rgba(239, 68, 68, ${intensity / 100})`;
+
+    if (value > 0) {
+      // Желтый оттенок для положительных значений
+      return `rgba(234, 179, 8, ${intensity / 100})`;
+    } else {
+      // Красный оттенок для отрицательных значений (как было)
+      return `rgba(239, 68, 68, ${intensity / 100})`;
+    }
+  };
+
+  // Функция для получения общего количества колонок
+  const getTotalColumns = (): number => {
+    return 1 + (tags.length * 3); // 1 для фраз + tags.length для каждой из 3 секций
+  };
+
+  // Функция для определения должна ли ячейка быть подсвечена
+  const shouldHighlightCell = (rowIndex: number, colIndex: number): boolean => {
+    return hoveredRow === rowIndex || hoveredCol === colIndex;
   };
 
   // Функция для отображения фразы с учетом специальных символов
@@ -177,26 +337,23 @@ export const KeywordsComparisonTable: React.FC<KeywordsComparisonTableProps> = (
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-4">
             <h3 className="font-medium text-gray-900">Ключевые слова</h3>
+            {sortConfig.direction !== "none" && (
+              <span className="text-sm text-blue-600 bg-blue-100 px-2 py-1 rounded">
+                Сортировка: {sortConfig.field === "ngram" ? "по алфавиту" : 
+                            sortConfig.field === "competitors" ? "по конкурентам" :
+                            sortConfig.field === "avg_count" ? "по среднему значению" :
+                            sortConfig.field === "my_count" ? "по вашим значениям" : 
+                            "по покрытию"} 
+                ({sortConfig.direction === "asc" ? "↑ возр." : "↓ убыв."})
+              </span>
+            )}
             {isGoogle && (
               <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
                 Google режим
               </span>
             )}
           </div>
-          <div className="flex items-center space-x-4">
-            <div className="flex items-center">
-              <div className="w-24 h-2 bg-gray-200 rounded-full overflow-hidden">
-                <div className="h-full bg-green-500" style={{ width: '30%' }}></div>
-              </div>
-              <span className="ml-2 text-sm text-green-600">30%</span>
-            </div>
-            <div className="flex items-center">
-              <div className="w-24 h-2 bg-gray-200 rounded-full overflow-hidden">
-                <div className="h-full bg-red-500 float-right" style={{ width: '60%' }}></div>
-              </div>
-              <span className="ml-2 text-sm text-red-600">60%</span>
-            </div>
-          </div>
+
         </div>
       </div>
 
@@ -204,18 +361,44 @@ export const KeywordsComparisonTable: React.FC<KeywordsComparisonTableProps> = (
         <table className="w-full">
           <thead>
           <tr className="border-b border-gray-200 bg-gray-800 text-white">
-            <th rowSpan={2} className="text-left py-3 px-4 font-medium text-sm min-w-[200px]">
-              Фразы
+            <th
+              rowSpan={2}
+              className="flex-item text-left py-3 px-4 font-medium text-sm min-w-[200px] transition-colors"
+              style={{
+                backgroundColor: shouldHighlightCell(-1, 0)
+                  ? `rgba(${ACTIVE_HOVER_COLOR.r}, ${ACTIVE_HOVER_COLOR.g}, ${ACTIVE_HOVER_COLOR.b}, ${HOVER_OPACITY.header})`
+                  : ''
+              }}
+              onMouseEnter={() => setHoveredCol(0)}
+              onMouseLeave={() => setHoveredCol(null)}
+            >
+                Фразы
             </th>
-            <th colSpan={tags.length} className="text-center py-2 px-4 font-medium text-sm border-l border-gray-600">
-              Top10
-              <div className="text-xs font-normal mt-1 text-gray-300">среднее кол-во на странице</div>
+            <th
+              colSpan={tags.length}
+              className="text-center py-2 px-4 font-medium text-sm border-l border-gray-600"
+            >
+                Top10
+              <div className="text-xs font-normal mt-1 text-gray-300">
+                среднее кол-во на странице
+              </div>
             </th>
-            <th colSpan={tags.length} className="text-center py-2 px-4 font-medium text-sm border-l border-gray-600">
-              diff
+            <th
+              colSpan={tags.length}
+              className="text-center py-2 px-4 font-medium text-sm border-l border-gray-600"
+              onClick={() => handleSortClick("diff")}
+              title={getSortTooltip("diff")}
+            >
+              <div className="flex items-center gap-2 justify-center truncate">
+                diff
+                {getSortIcon("diff")}
+              </div>
             </th>
-            <th colSpan={tags.length} className="text-center py-2 px-4 font-medium text-sm border-l border-gray-600">
-              src
+            <th
+              colSpan={tags.length}
+              className="text-center py-2 px-4 font-medium text-sm border-l border-gray-600"
+            >
+                src
             </th>
           </tr>
           <tr className="border-b border-gray-200 bg-gray-700 text-white text-xs">
@@ -224,9 +407,16 @@ export const KeywordsComparisonTable: React.FC<KeywordsComparisonTableProps> = (
               <th
                 key={`top10-${i}`}
                 className={cn(
-                  'text-center py-2 px-2 whitespace-pre-line',
+                  'text-center py-2 px-2 whitespace-pre-line transition-colors',
                   isGoogle && 'min-w-[120px]'
                 )}
+                style={{
+                  backgroundColor: shouldHighlightCell(-1, i + 1)
+                    ? `rgba(${ACTIVE_HOVER_COLOR.r}, ${ACTIVE_HOVER_COLOR.g}, ${ACTIVE_HOVER_COLOR.b}, ${HOVER_OPACITY.header})`
+                    : ''
+                }}
+                onMouseEnter={() => setHoveredCol(i + 1)}
+                onMouseLeave={() => setHoveredCol(null)}
               >
                 {getTagDisplay(tag)}
               </th>
@@ -236,9 +426,16 @@ export const KeywordsComparisonTable: React.FC<KeywordsComparisonTableProps> = (
               <th
                 key={`diff-${i}`}
                 className={cn(
-                  'text-center py-2 px-2 whitespace-pre-line border-l border-gray-600',
+                  'text-center py-2 px-2 whitespace-pre-line border-l border-gray-600 transition-colors',
                   isGoogle && 'min-w-[120px]'
                 )}
+                style={{
+                  backgroundColor: shouldHighlightCell(-1, i + 1 + tags.length)
+                    ? `rgba(${ACTIVE_HOVER_COLOR.r}, ${ACTIVE_HOVER_COLOR.g}, ${ACTIVE_HOVER_COLOR.b}, ${HOVER_OPACITY.header})`
+                    : ''
+                }}
+                onMouseEnter={() => setHoveredCol(i + 1 + tags.length)}
+                onMouseLeave={() => setHoveredCol(null)}
               >
                 {getTagDisplay(tag)}
               </th>
@@ -248,9 +445,16 @@ export const KeywordsComparisonTable: React.FC<KeywordsComparisonTableProps> = (
               <th
                 key={`src-${i}`}
                 className={cn(
-                  'text-center py-2 px-2 whitespace-pre-line border-l border-gray-600',
+                  'text-center py-2 px-2 whitespace-pre-line border-l border-gray-600 transition-colors',
                   isGoogle && 'min-w-[120px]'
                 )}
+                style={{
+                  backgroundColor: shouldHighlightCell(-1, i + 1 + tags.length * 2)
+                    ? `rgba(${ACTIVE_HOVER_COLOR.r}, ${ACTIVE_HOVER_COLOR.g}, ${ACTIVE_HOVER_COLOR.b}, ${HOVER_OPACITY.header})`
+                    : ''
+                }}
+                onMouseEnter={() => setHoveredCol(i + 1 + tags.length * 2)}
+                onMouseLeave={() => setHoveredCol(null)}
               >
                 {getTagDisplay(tag)}
               </th>
@@ -272,11 +476,29 @@ export const KeywordsComparisonTable: React.FC<KeywordsComparisonTableProps> = (
               <tr
                 key={index}
                 className={cn(
-                  'border-b border-gray-200 hover:bg-gray-50',
+                  'border-b border-gray-200 transition-colors',
                   hasAnomalousValues && 'bg-yellow-50'
                 )}
+                style={{
+                  backgroundColor: shouldHighlightCell(index, -1)
+                    ? hasAnomalousValues
+                      ? `rgba(${ACTIVE_HOVER_COLOR.r}, ${ACTIVE_HOVER_COLOR.g}, ${ACTIVE_HOVER_COLOR.b}, ${HOVER_OPACITY.rowAnomalous})`
+                      : `rgba(${ACTIVE_HOVER_COLOR.r}, ${ACTIVE_HOVER_COLOR.g}, ${ACTIVE_HOVER_COLOR.b}, ${HOVER_OPACITY.row})`
+                    : ''
+                }}
+                onMouseEnter={() => setHoveredRow(index)}
+                onMouseLeave={() => setHoveredRow(null)}
               >
-                <td className="py-3 px-4 font-medium text-sm">
+                <td
+                  className="py-3 px-4 font-medium text-sm transition-colors"
+                  style={{
+                    backgroundColor: shouldHighlightCell(index, 0)
+                      ? `rgba(${ACTIVE_HOVER_COLOR.r}, ${ACTIVE_HOVER_COLOR.g}, ${ACTIVE_HOVER_COLOR.b}, ${HOVER_OPACITY.cell})`
+                      : ''
+                  }}
+                  onMouseEnter={() => setHoveredCol(0)}
+                  onMouseLeave={() => setHoveredCol(null)}
+                >
                   {renderPhrase(row.phrase)}
                   {hasAnomalousValues && (
                     <span className="ml-2 text-xs text-yellow-600" title="Обнаружены аномальные значения">
@@ -287,33 +509,60 @@ export const KeywordsComparisonTable: React.FC<KeywordsComparisonTableProps> = (
 
                 {/* Top10 cells */}
                 {tags.map((tag, i) => (
-                  <td key={`top10-${i}`} className="text-center py-3 px-2 text-sm">
+                  <td
+                    key={`top10-${i}`}
+                    className="text-center py-3 px-2 text-sm transition-colors"
+                    style={{
+                      backgroundColor: shouldHighlightCell(index, i + 1)
+                        ? `rgba(${ACTIVE_HOVER_COLOR.r}, ${ACTIVE_HOVER_COLOR.g}, ${ACTIVE_HOVER_COLOR.b}, ${HOVER_OPACITY.cell})`
+                        : ''
+                    }}
+                    onMouseEnter={() => setHoveredCol(i + 1)}
+                    onMouseLeave={() => setHoveredCol(null)}
+                  >
                     {Math.round(getTagValue(row, 'Top10', tag))}
                   </td>
                 ))}
 
                 {/* diff cells with color */}
-                {tags.map((tag, i) => (
-                  <td
-                    key={`diff-${i}`}
-                    className={cn(
-                      'text-center py-3 px-2 text-sm',
-                      i === 0 && 'border-l border-gray-200'
-                    )}
-                    style={{ backgroundColor: getDiffCellColor(getTagValue(row, 'diff', tag)) }}
-                  >
-                    {getTagValue(row, 'diff', tag)}
-                  </td>
-                ))}
+                {tags.map((tag, i) => {
+                  const cellValue = getTagValue(row, 'diff', tag);
+                  const diffColor = getDiffCellColor(cellValue);
+                  const isHighlighted = shouldHighlightCell(index, i + 1 + tags.length);
+
+                  return (
+                    <td
+                      key={`diff-${i}`}
+                      className={cn(
+                        'text-center py-3 px-2 text-sm transition-colors',
+                        i === 0 && 'border-l border-gray-200'
+                      )}
+                      style={{
+                        backgroundColor: blendColors(diffColor, isHighlighted, HOVER_OPACITY.diffCell, ACTIVE_HOVER_COLOR)
+                      }}
+                      onMouseEnter={() => setHoveredCol(i + 1 + tags.length)}
+                      onMouseLeave={() => setHoveredCol(null)}
+                    >
+                      {cellValue}
+                    </td>
+                  );
+                })}
 
                 {/* src cells */}
                 {tags.map((tag, i) => (
                   <td
                     key={`src-${i}`}
                     className={cn(
-                      'text-center py-3 px-2 text-sm',
+                      'text-center py-3 px-2 text-sm transition-colors',
                       i === 0 && 'border-l border-gray-200'
                     )}
+                    style={{
+                      backgroundColor: shouldHighlightCell(index, i + 1 + tags.length * 2)
+                        ? `rgba(${ACTIVE_HOVER_COLOR.r}, ${ACTIVE_HOVER_COLOR.g}, ${ACTIVE_HOVER_COLOR.b}, ${HOVER_OPACITY.cell})`
+                        : ''
+                    }}
+                    onMouseEnter={() => setHoveredCol(i + 1 + tags.length * 2)}
+                    onMouseLeave={() => setHoveredCol(null)}
                   >
                     {tag === 'body' && !isGoogle ? 0 : Math.round(getTagValue(row, 'src', tag))}
                   </td>
@@ -323,8 +572,28 @@ export const KeywordsComparisonTable: React.FC<KeywordsComparisonTableProps> = (
           })}
 
           {/* Строка с суммами */}
-          <tr className="bg-red-600 text-white font-bold">
-            <td className="py-3 px-4 text-sm border-b-0">Всего слов:</td>
+          <tr
+            className="bg-red-600 text-white font-bold transition-colors"
+            style={{
+              backgroundColor: shouldHighlightCell(currentData.length, -1)
+                ? '#dc2626' // Более темный красный при hover
+                : ''
+            }}
+            onMouseEnter={() => setHoveredRow(currentData.length)}
+            onMouseLeave={() => setHoveredRow(null)}
+          >
+            <td
+              className="py-3 px-4 text-sm border-b-0 transition-colors"
+              style={{
+                backgroundColor: shouldHighlightCell(currentData.length, 0)
+                  ? `rgba(${ACTIVE_HOVER_COLOR.r}, ${ACTIVE_HOVER_COLOR.g}, ${ACTIVE_HOVER_COLOR.b}, ${HOVER_OPACITY.cell})`
+                  : ''
+              }}
+              onMouseEnter={() => setHoveredCol(0)}
+              onMouseLeave={() => setHoveredCol(null)}
+            >
+              Всего слов:
+            </td>
 
             {/* Суммы для Top10 */}
             {tags.map((tag, i) => {
@@ -345,7 +614,17 @@ export const KeywordsComparisonTable: React.FC<KeywordsComparisonTableProps> = (
                 value = Math.round(totalWordsData?.top10?.[dataTag] || 0);
               }
               return (
-                <td key={`total-top10-${i}`} className="text-center py-3 px-2 text-sm">
+                <td
+                  key={`total-top10-${i}`}
+                  className="text-center py-3 px-2 text-sm transition-colors"
+                  style={{
+                    backgroundColor: shouldHighlightCell(currentData.length, i + 1)
+                      ? `rgba(${ACTIVE_HOVER_COLOR.r}, ${ACTIVE_HOVER_COLOR.g}, ${ACTIVE_HOVER_COLOR.b}, ${HOVER_OPACITY.cell})`
+                      : ''
+                  }}
+                  onMouseEnter={() => setHoveredCol(i + 1)}
+                  onMouseLeave={() => setHoveredCol(null)}
+                >
                   {value}
                 </td>
               );
@@ -353,7 +632,18 @@ export const KeywordsComparisonTable: React.FC<KeywordsComparisonTableProps> = (
 
             {/* Пустые ячейки для diff */}
             {tags.map((tag, i) => (
-              <td key={`total-diff-${i}`} className="text-center py-3 px-2 text-sm bg-white"></td>
+              <td
+                key={`total-diff-${i}`}
+                className="text-center py-3 px-2 text-sm bg-white transition-colors"
+                style={{
+                  backgroundColor: shouldHighlightCell(currentData.length, i + 1 + tags.length)
+                    ? `rgba(${ACTIVE_HOVER_COLOR.r}, ${ACTIVE_HOVER_COLOR.g}, ${ACTIVE_HOVER_COLOR.b}, ${HOVER_OPACITY.cell})`
+                    : ''
+                }}
+                onMouseEnter={() => setHoveredCol(i + 1 + tags.length)}
+                onMouseLeave={() => setHoveredCol(null)}
+              >
+              </td>
             ))}
 
             {/* Суммы для src */}
@@ -380,9 +670,16 @@ export const KeywordsComparisonTable: React.FC<KeywordsComparisonTableProps> = (
                 <td
                   key={`total-src-${i}`}
                   className={cn(
-                    'text-center py-3 px-2 text-sm',
+                    'text-center py-3 px-2 text-sm transition-colors',
                     i === 0 && 'border-l border-red-700'
                   )}
+                  style={{
+                    backgroundColor: shouldHighlightCell(currentData.length, i + 1 + tags.length * 2)
+                      ? `rgba(${ACTIVE_HOVER_COLOR.r}, ${ACTIVE_HOVER_COLOR.g}, ${ACTIVE_HOVER_COLOR.b}, ${HOVER_OPACITY.cell})`
+                      : ''
+                  }}
+                  onMouseEnter={() => setHoveredCol(i + 1 + tags.length * 2)}
+                  onMouseLeave={() => setHoveredCol(null)}
                 >
                   {value}
                 </td>

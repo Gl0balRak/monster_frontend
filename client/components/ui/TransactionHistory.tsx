@@ -59,11 +59,23 @@ export const TransactionHistory: React.FC<TransactionHistoryProps> = ({
             className="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer"
           >
             <div className="flex items-center space-x-3">
-              <div className="p-2 bg-green-100 rounded-lg">
-                <DollarSign className="w-5 h-5 text-green-600" />
+              <div className="p-2 rounded-lg"><DollarSign
+                className={
+                  "w-5 h-5 " +
+                  (transaction.type === "CREDIT"
+                    ? "bg-green-50 text-green-600"
+                    : transaction.type === "DEBIT"
+                      ? "bg-red-50 text-red-600"
+                      : "bg-yellow-100 text-yellow-400")
+                }
+              />
               </div>
               <div>
-                <p className="font-medium text-gray-900">+ {transaction.amount} кредитов</p>
+                <p className="font-medium text-gray-900">{
+                  (transaction.type === "CREDIT"
+                    ? `+`
+                    : `-`)
+                } {transaction.amount} лимитов</p>
                 <p className="text-sm text-gray-600">{formatDate(transaction.date)}</p>
               </div>
             </div>

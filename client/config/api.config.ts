@@ -1,6 +1,6 @@
 // API Configuration
 export const API_CONFIG = {
-  BASE_URL: "http://localhost:7000",
+  BASE_URL: "http://localhost:3002",
   ENDPOINTS: {
     AUTHORIZE: "/semantix/authorize",
     REGIONS: "/semantix/service/regions",

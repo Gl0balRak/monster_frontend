@@ -31,7 +31,7 @@ export const ProgressIndicator: React.FC<ProgressIndicatorProps> = ({
 
   // Вычисляем процент для отображения прогресс-бара
   const percentage = target > 0 ? Math.min((current / target) * 100, 100) : 0;
-  const difference = current - target;
+  const difference = Number((current - target).toFixed(3));
 
   // Определяем цвета
   let bgColorClass = 'bg-green-500'; // По умолчанию зеленый

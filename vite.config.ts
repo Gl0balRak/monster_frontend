@@ -6,7 +6,7 @@ import path from "path";
 export default defineConfig({
   server: {
     host: "::",
-    port: 8080,
+    port: 3000,
     allowedHosts: ["tools.mihaylov.digital"], // Добавьте эту строку
     fs: {
       allow: ["./client"],
@@ -19,6 +19,21 @@ export default defineConfig({
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./client"),
+    },
+  },
+  test: {
+    globals: true,
+    environment: 'happy-dom',
+    setupFiles: './client/setupTests.ts',
+    coverage: {
+      provider: 'v8',
+      reporter: ['text', 'json', 'html'],
+      exclude: [
+        '**/*.config.*',
+        '**/dist/**',
+        '**/node_modules/**',
+        '**/client/test-utils/**'
+      ],
     },
   },
 });
