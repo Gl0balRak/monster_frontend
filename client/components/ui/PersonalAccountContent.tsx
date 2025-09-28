@@ -3,7 +3,7 @@ import { UserProfileCard } from "@/components/cards/UserProfileCard";
 import { StatsCards } from "@/components/cards/StatsCards";
 import { CreditsPurchase } from "@/components/cards/CreditsPurchase";
 import { TariffCards } from "@/components/cards/TariffCards";
-import { DocumentIcon } from "@/components/layout/Sidebar"
+import { DocumentIcon } from "@/components/layout/Sidebar";
 import { TransactionHistory } from "@/components/ui//TransactionHistory";
 import { useAuth } from "@/hooks/useAuth.jsx";
 import { API_ENDPOINTS } from "@/config/api.config.js";
@@ -15,13 +15,17 @@ interface PersonalAccountContentProps {
 }
 
 export const PersonalAccountContent: React.FC<PersonalAccountContentProps> = ({
-                                                                                onLogout,
-                                                                              }) => {
+  onLogout,
+}) => {
   const { user, logout } = useAuth();
   const [userInfo, setUserInfo] = useState<any>(null);
   const [credits, setCredits] = useState("-");
-  const [selectedTariff, setSelectedTariff] = useState<string | undefined>(undefined);
-  const [currentTariffId, setCurrentTariffId] = useState<string | undefined>(undefined);
+  const [selectedTariff, setSelectedTariff] = useState<string | undefined>(
+    undefined,
+  );
+  const [currentTariffId, setCurrentTariffId] = useState<string | undefined>(
+    undefined,
+  );
   const [tariffItems, setTariffItems] = useState<any[]>([]);
   const [transactions, setTransactions] = useState([]);
   const [confirmOpen, setConfirmOpen] = useState(false);
@@ -77,12 +81,14 @@ export const PersonalAccountContent: React.FC<PersonalAccountContentProps> = ({
 
         if (response.ok) {
           const data = await response.json();
-          let new_transactions = data["operations_log"].map((operation: any) => ({
+          let new_transactions = data["operations_log"].map(
+            (operation: any) => ({
               id: operation.id,
               amount: operation.amount,
               type: operation.entry_type,
-              date: new Date(operation.created_at)
-          }));
+              date: new Date(operation.created_at),
+            }),
+          );
           setTransactions(new_transactions);
         }
       } catch (error) {
@@ -142,7 +148,9 @@ export const PersonalAccountContent: React.FC<PersonalAccountContentProps> = ({
   };
 
   const handlePurchase = (amount: number) => {
-    setCredits((prev: any) => (typeof prev === 'number' ? prev + amount : amount));
+    setCredits((prev: any) =>
+      typeof prev === "number" ? prev + amount : amount,
+    );
   };
 
   const handleTariffChange = (tariffId: string) => {
@@ -285,7 +293,8 @@ export const PersonalAccountContent: React.FC<PersonalAccountContentProps> = ({
         <footer className="mt-16 pt-8 border-t border-gray-200">
           <div className="flex flex-col items-center text-center space-y-4">
             <div className="text-sm text-gray-500">
-              Нажимая на кнопки покупки услуг, вы соглашаетесь с условиями оферты
+              Нажимая на кнопки покупки услуг, вы соглашаетесь с условиями
+              оферты
             </div>
 
             <a

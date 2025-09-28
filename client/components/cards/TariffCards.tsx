@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { Plus, Star, Zap } from 'lucide-react';
+import React, { useEffect, useState } from "react";
+import { Plus, Star, Zap } from "lucide-react";
 
 interface Tariff {
   id: string;
@@ -25,15 +25,17 @@ export const TariffCards: React.FC<TariffCardsProps> = ({
   selectedTariff: externalSelectedTariff,
   onTariffChange,
   onChangeTariff,
-  className = '',
+  className = "",
   items,
 }) => {
   const [selectedTariff, setSelectedTariff] = useState<string | undefined>(
-    externalSelectedTariff || items?.find((t) => t.isActive)?.id
+    externalSelectedTariff || items?.find((t) => t.isActive)?.id,
   );
 
   useEffect(() => {
-    setSelectedTariff(externalSelectedTariff || items?.find((t) => t.isActive)?.id);
+    setSelectedTariff(
+      externalSelectedTariff || items?.find((t) => t.isActive)?.id,
+    );
   }, [externalSelectedTariff, items]);
 
   const handleTariffSelect = (tariffId: string) => {
@@ -45,30 +47,42 @@ export const TariffCards: React.FC<TariffCardsProps> = ({
 
   const defaultTariffs: Tariff[] = [
     {
-      id: 'novice',
-      name: 'Новичок',
+      id: "novice",
+      name: "Новичок",
       icon: <Star className="w-5 h-5" />,
-      activeUntil: '—',
-      credits: '—',
-      price: '—',
-      features: ['Базовый анализ', 'До 10 проверок в день', 'Email поддержка']
+      activeUntil: "—",
+      credits: "—",
+      price: "—",
+      features: ["Базовый анализ", "До 10 проверок в день", "Email поддержка"],
     },
     {
-      id: 'additional',
-      name: 'Дополнительно',
+      id: "additional",
+      name: "Дополнительно",
       icon: <Zap className="w-5 h-5" />,
-      activeUntil: '—',
-      credits: '—',
-      price: '—',
-      features: ['Расширенный анализ', 'До 50 проверок в день', 'Приоритетная поддержка', 'API доступ'],
-      popular: true
-    }
+      activeUntil: "—",
+      credits: "—",
+      price: "—",
+      features: [
+        "Расширенный анализ",
+        "До 50 проверок в день",
+        "Приоритетная поддержка",
+        "API доступ",
+      ],
+      popular: true,
+    },
   ];
 
-  const tariffsToRender = (items && items.length > 0 ? items : defaultTariffs).map((t, idx) => ({
+  const tariffsToRender = (
+    items && items.length > 0 ? items : defaultTariffs
+  ).map((t, idx) => ({
     ...t,
     icon:
-      t.icon || (idx % 2 === 0 ? <Star className="w-5 h-5" /> : <Zap className="w-5 h-5" />),
+      t.icon ||
+      (idx % 2 === 0 ? (
+        <Star className="w-5 h-5" />
+      ) : (
+        <Zap className="w-5 h-5" />
+      )),
   }));
 
   return (
@@ -95,10 +109,10 @@ export const TariffCards: React.FC<TariffCardsProps> = ({
               key={tariff.id}
               className={`relative rounded-xl p-6 cursor-pointer transition-all hover:shadow-lg ${
                 isActive
-                  ? 'bg-gradient-to-br from-red-500 to-red-600 text-white shadow-xl'
+                  ? "bg-gradient-to-br from-red-500 to-red-600 text-white shadow-xl"
                   : isSelectedOnly
-                    ? 'bg-red-0 border border-red-3 ring-1 ring-red-7'
-                    : 'bg-gray-50 hover:bg-gray-100 border border-gray-200'
+                    ? "bg-red-0 border border-red-3 ring-1 ring-red-7"
+                    : "bg-gray-50 hover:bg-gray-100 border border-gray-200"
               }`}
               onClick={() => handleTariffSelect(tariff.id)}
             >
@@ -110,23 +124,41 @@ export const TariffCards: React.FC<TariffCardsProps> = ({
 
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center space-x-3">
-                  <div className={`p-2 rounded-lg ${
-                    isActive ? 'bg-white/20' : isSelectedOnly ? 'bg-red-0' : 'bg-red-50'
-                  }`}>
+                  <div
+                    className={`p-2 rounded-lg ${
+                      isActive
+                        ? "bg-white/20"
+                        : isSelectedOnly
+                          ? "bg-red-0"
+                          : "bg-red-50"
+                    }`}
+                  >
                     {React.cloneElement(tariff.icon as React.ReactElement, {
-                      className: `w-5 h-5 ${isActive ? 'text-white' : isSelectedOnly ? 'text-red-7' : 'text-red-600'}`
+                      className: `w-5 h-5 ${isActive ? "text-white" : isSelectedOnly ? "text-red-7" : "text-red-600"}`,
                     })}
                   </div>
                   <div>
-                    <h4 className={`font-bold ${
-                      isActive ? 'text-white' : isSelectedOnly ? 'text-red-9' : 'text-gray-900'
-                    }`}>
+                    <h4
+                      className={`font-bold ${
+                        isActive
+                          ? "text-white"
+                          : isSelectedOnly
+                            ? "text-red-9"
+                            : "text-gray-900"
+                      }`}
+                    >
                       Тариф "{tariff.name}"
                     </h4>
                     {tariff.activeUntil && (
-                      <p className={`text-sm ${
-                        isActive ? 'text-white/80' : isSelectedOnly ? 'text-gray-700' : 'text-gray-600'
-                      }`}>
+                      <p
+                        className={`text-sm ${
+                          isActive
+                            ? "text-white/80"
+                            : isSelectedOnly
+                              ? "text-gray-700"
+                              : "text-gray-600"
+                        }`}
+                      >
                         Активен до {tariff.activeUntil}
                       </p>
                     )}
@@ -140,9 +172,15 @@ export const TariffCards: React.FC<TariffCardsProps> = ({
               </div>
 
               {tariff.price && (
-                <div className={`text-2xl font-bold mb-4 ${
-                  isActive ? 'text-white' : isSelectedOnly ? 'text-red-9' : 'text-gray-900'
-                }`}>
+                <div
+                  className={`text-2xl font-bold mb-4 ${
+                    isActive
+                      ? "text-white"
+                      : isSelectedOnly
+                        ? "text-red-9"
+                        : "text-gray-900"
+                  }`}
+                >
                   {tariff.price}
                 </div>
               )}
@@ -150,9 +188,16 @@ export const TariffCards: React.FC<TariffCardsProps> = ({
               {tariff.features && tariff.features.length > 0 && (
                 <ul className="space-y-2">
                   {tariff.features.map((feature, idx) => (
-                    <li key={idx} className={`text-sm flex items-center ${
-                      isActive ? 'text-white/90' : isSelectedOnly ? 'text-gray-700' : 'text-gray-600'
-                    }`}>
+                    <li
+                      key={idx}
+                      className={`text-sm flex items-center ${
+                        isActive
+                          ? "text-white/90"
+                          : isSelectedOnly
+                            ? "text-gray-700"
+                            : "text-gray-600"
+                      }`}
+                    >
                       <Plus className="w-4 h-4 mr-1" />
                       {feature}
                     </li>

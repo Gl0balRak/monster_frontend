@@ -1,9 +1,9 @@
 // client/config/api.config.js
 
 // Используем import.meta.env для Vite вместо process.env
-const AUTH_API_URL = 'http://127.0.0.1:3001';
-const ANALYZER_API_URL = 'http://127.0.0.1:3001';
-const PAYMENT_API_URL = 'http://127.0.0.1:3001';
+const AUTH_API_URL = "http://127.0.0.1:3001";
+const ANALYZER_API_URL = "http://127.0.0.1:3001";
+const PAYMENT_API_URL = "http://127.0.0.1:3001";
 
 export const API_ENDPOINTS = {
   // Auth endpoints (порт 1001)
@@ -48,8 +48,8 @@ export const API_ENDPOINTS = {
   },
   limits: {
     balance: `${PAYMENT_API_URL}/payment/balance`,
-    transactionHistory: `${PAYMENT_API_URL}/payment/operations-log`
-  }
+    transactionHistory: `${PAYMENT_API_URL}/payment/operations-log`,
+  },
 };
 
 export { AUTH_API_URL, ANALYZER_API_URL, PAYMENT_API_URL };
