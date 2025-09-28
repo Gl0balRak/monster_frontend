@@ -1,4 +1,3 @@
-import React, { useState, useEffect } from "react";
 import React, { useEffect, useState } from "react";
 import { UserProfileCard } from "@/components/cards/UserProfileCard";
 import { StatsCards } from "@/components/cards/StatsCards";
@@ -296,7 +295,7 @@ export const PersonalAccountContent: React.FC<PersonalAccountContentProps> = ({
               className="inline-flex items-center gap-2 px-4 py-2 text-sm text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded-lg transition-colors duration-200"
             >
               <DocumentIcon />
-              Скачать оферту (PDF)
+              Ска��ать оферту (PDF)
             </a>
 
             <div className="text-xs text-gray-400">
