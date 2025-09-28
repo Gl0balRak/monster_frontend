@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { UserProfileCard } from "@/components/cards/UserProfileCard";
 import { StatsCards } from "@/components/cards/StatsCards";
 import { CreditsPurchase } from "@/components/cards/CreditsPurchase";
@@ -27,7 +28,7 @@ export const PersonalAccountContent: React.FC<PersonalAccountContentProps> = ({
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [isChanging, setIsChanging] = useState(false);
 
-  // Получаем информацию о пользователе и тарифы с API
+  // Получаем информацию о пользователе и тариф�� с API
   useEffect(() => {
     const fetchData = async () => {
       if (!user) return;
