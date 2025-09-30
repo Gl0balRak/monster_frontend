@@ -286,7 +286,7 @@ const QueryIndexPage: React.FC = () => {
 
   return (
     <div className="flex-1 bg-gray-0 p-6">
-      <div className="max-w-[1400px] mx-auto">
+      <div className="w-full">
         <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
           {/* Левая панель - Входные параметры */}
           <div className="space-y-6">

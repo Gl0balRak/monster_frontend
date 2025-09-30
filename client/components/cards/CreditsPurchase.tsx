@@ -1,20 +1,73 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Gift, ShoppingCart, RefreshCw, FileText, DollarSign } from 'lucide-react';
 import { API_ENDPOINTS } from '../../config/api.config';
 
 interface CreditsPurchaseProps {
   onPurchase?: (amount: number) => void;
   className?: string;
+  disabled?: boolean;
 }
 
 export const CreditsPurchase: React.FC<CreditsPurchaseProps> = ({
   onPurchase,
-  className = ''
+  className = '',
+  disabled = false,
 }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [creditAmount, setCreditAmount] = useState(1000);
+  const [cost, setCost] = useState<number | null>(null);
+  const [costLoading, setCostLoading] = useState(false);
+  const [costError, setCostError] = useState<string | null>(null);
 
+  useEffect(() => {
+    let timer: number | undefined;
+    const fetchCost = async () => {
+      if (!Number.isFinite(creditAmount) || creditAmount <= 0) {
+        setCost(null);
+        return;
+      }
+      try {
+        setCostLoading(true);
+        setCostError(null);
+        const params = new URLSearchParams({ limits: String(creditAmount) });
+        const url = `${API_ENDPOINTS.limits.cost}?${params.toString()}`;
+        const resp = await fetch(url, {
+          method: 'GET',
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('access_token')}`,
+          },
+        });
+        if (!resp.ok) {
+          const errBody = await resp.text();
+          throw new Error(`Failed to fetch cost: ${resp.status} ${errBody}`);
+        }
+        const data = await resp.json();
+        let parsedCost: number | null = null;
+        if (typeof data === 'number') {
+          parsedCost = data;
+        } else if (data && typeof data.cost === 'number') {
+          parsedCost = data.cost;
+        } else if (data && data.cost != null) {
+          const n = Number(data.cost);
+          parsedCost = Number.isFinite(n) ? n : null;
+        } else {
+          const n = Number(data);
+          parsedCost = Number.isFinite(n) ? n : null;
+        }
+        setCost(parsedCost);
+      } catch (e: any) {
+        setCostError('Не удалось получить стоимость');
+        setCost(null);
+      } finally {
+        setCostLoading(false);
+      }
+    };
+    timer = window.setTimeout(fetchCost, 300);
+    return () => {
+      if (timer) window.clearTimeout(timer);
+    };
+  }, [creditAmount]);
 
 const handleBuyCredits = async () => {
   try {
@@ -85,8 +138,13 @@ const handleBuyCredits = async () => {
       <div className="bg-gradient-to-r from-red-50 to-orange-50 rounded-lg p-4 mb-6">
         <p className="text-sm text-gray-700 mb-1">
           Вы оплачиваете покупку <span className="font-bold">{creditAmount.toLocaleString()} лимитов</span> за{' '}
-          <span className="font-bold text-red-600">{creditAmount.toLocaleString()} рублей</span>.
+          <span className="font-bold text-red-600">
+            {costLoading ? 'Расчёт...' : cost !== null ? `${cost.toLocaleString()} рублей` : '—'}
+          </span>.
         </p>
+        {costError && (
+          <p className="text-xs text-red-600">{costError}</p>
+        )}
         <p className="text-xs text-gray-600">
           Для продолжения операции нажмите кнопку "Купить".
         </p>
@@ -94,7 +152,7 @@ const handleBuyCredits = async () => {
 
       <button
         onClick={handleBuyCredits}
-        disabled={isLoading}
+        disabled={isLoading || disabled}
         className="w-full bg-gradient-to-r from-red-500 to-red-600 text-white py-3 px-6 rounded-lg hover:from-red-600 hover:to-red-700 transition-all hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed font-medium shadow-lg"
       >
         {isLoading ? (

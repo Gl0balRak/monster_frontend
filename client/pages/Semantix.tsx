@@ -1109,7 +1109,7 @@ const Semantix: React.FC = () => {
 
   return (
     <div className="flex-1 bg-gray-0 p-6">
-      <div className="max-w-7xl mx-auto space-y-6">
+      <div className="w-full">
         {/* Заголовок страницы */}
         {/*<div className="border-b pb-4">*/}
         {/*  <h1 className="text-2xl font-bold text-gray-900">Семантикс</h1>*/}
@@ -1597,69 +1597,57 @@ const Semantix: React.FC = () => {
         </div>
 
         {/* 7. Панель действий */}
-        <div className="bg-white rounded-lg p-6">
-          <div className="flex flex-wrap gap-3">
+        <div className="bg-white rounded-lg p-4 sm:p-6">
+          <div className="grid grid-cols-1 min-[943px]:grid-cols-2 min-[1216px]:grid-cols-3 min-[1473px]:grid-cols-4 gap-3">
+            <div className="min-[943px]:col-span-2 min-[1216px]:col-span-1 grid grid-cols-2 gap-3">
+              <ActionButton
+                icon={
+                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                    <path
+                      fillRule="evenodd"
+                      d="M9 3.5a5.5 5.5 0 100 11 5.5 5.5 0 000-11zM2 9a7 7 0 1112.452 4.391l3.328 3.329a.75.75 0 11-1.06 1.06l-3.329-3.328A7 7 0 012 9z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                }
+                color="red"
+                onClick={handleParsing}
+                disabled={loadingStates.parsing}
+                className="h-12"
+              >
+                {loadingStates.parsing ? "Парсинг..." : "Парсинг"}
+              </ActionButton>
+              <ActionButton
+                icon={
+                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M10 2L3 7v11a1 1 0 001 1h3v-6h6v6h3a1 1 0 001-1V7l-7-5z" />
+                  </svg>
+                }
+                color="purple"
+                onClick={handleCleaning}
+                disabled={loadingStates.cleaning}
+                className="h-12"
+              >
+                {loadingStates.cleaning ? "Чистка..." : "Чистка"}
+              </ActionButton>
+            </div>
             <ActionButton
               icon={
-                <svg
-                  className="w-5 h-5"
-                  fill="currentColor"
-                  viewBox="0 0 20 20"
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M9 3.5a5.5 5.5 0 100 11 5.5 5.5 0 000-11zM2 9a7 7 0 1112.452 4.391l3.328 3.329a.75.75 0 11-1.06 1.06l-3.329-3.328A7 7 0 012 9z"
-                    clipRule="evenodd"
-                  />
-                </svg>
-              }
-              color="red"
-              onClick={handleParsing}
-              disabled={loadingStates.parsing}
-            >
-              {loadingStates.parsing ? "Парсинг..." : "Парсинг"}
-            </ActionButton>
-            <ActionButton
-              icon={
-                <svg
-                  className="w-5 h-5"
-                  fill="currentColor"
-                  viewBox="0 0 20 20"
-                >
-                  <path d="M10 2L3 7v11a1 1 0 001 1h3v-6h6v6h3a1 1 0 001-1V7l-7-5z" />
-                </svg>
-              }
-              color="purple"
-              onClick={handleCleaning}
-              disabled={loadingStates.cleaning}
-            >
-              {loadingStates.cleaning ? "Чистка..." : "Чистка"}
-            </ActionButton>
-            <ActionButton
-              icon={
-                <svg
-                  className="w-5 h-5"
-                  fill="currentColor"
-                  viewBox="0 0 20 20"
-                >
+                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                   <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                 </svg>
               }
               color="green"
               onClick={handleSearchSuggestions}
               disabled={loadingStates.searchSuggestions}
+              className="h-12"
             >
-              {loadingStates.searchSuggestions
-                ? "Выгрузка..."
-                : "Выгрузить поисковые подсказки"}
+              {loadingStates.searchSuggestions ? "Выгрузка..." : "Выгрузить поисковые подсказки"}
             </ActionButton>
+
             <ActionButton
               icon={
-                <svg
-                  className="w-5 h-5"
-                  fill="currentColor"
-                  viewBox="0 0 20 20"
-                >
+                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                   <path d="M2 10a8 8 0 018-8v8h8a8 8 0 11-16 0z" />
                   <path d="M12 2.252A8.014 8.014 0 0117.748 8H12V2.252z" />
                 </svg>
@@ -1667,34 +1655,28 @@ const Semantix: React.FC = () => {
               color="darkBlue"
               onClick={handleFrequencies}
               disabled={loadingStates.frequencies}
+              className="h-12"
             >
               {loadingStates.frequencies ? "Парсинг..." : "Парсинг частот"}
             </ActionButton>
+
             <ActionButton
               icon={
-                <svg
-                  className="w-5 h-5"
-                  fill="currentColor"
-                  viewBox="0 0 20 20"
-                >
+                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                   <path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zM8 7a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zM14 4a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z" />
                 </svg>
               }
               color="cyan"
               onClick={handleDemandClicks}
               disabled={loadingStates.demandClicks}
+              className="h-12"
             >
-              {loadingStates.demandClicks
-                ? "Загрузка..."
-                : "Загрузка спроса и кликов"}
+              {loadingStates.demandClicks ? "Загрузка..." : "Загрузка спроса и кликов"}
             </ActionButton>
+
             <ActionButton
               icon={
-                <svg
-                  className="w-5 h-5"
-                  fill="currentColor"
-                  viewBox="0 0 20 20"
-                >
+                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                   <path
                     fillRule="evenodd"
                     d="M6 6V5a3 3 0 013-3h2a3 3 0 013 3v1h2a2 2 0 012 2v3.57A22.952 22.952 0 0110 13a22.95 22.95 0 01-8-1.43V8a2 2 0 012-2h2zm2-1a1 1 0 011-1h2a1 1 0 011 1v1H8V5zm1 5a1 1 0 011-1h.01a1 1 0 110 2H10a1 1 0 01-1-1z"
@@ -1706,18 +1688,14 @@ const Semantix: React.FC = () => {
               color="orange"
               onClick={handleCompetition}
               disabled={loadingStates.competition}
+              className="h-12"
             >
-              {loadingStates.competition
-                ? "Проверка..."
-                : "Проверка конкурентности"}
+              {loadingStates.competition ? "Проверка..." : "Проверка конкурентности"}
             </ActionButton>
+
             <ActionButton
               icon={
-                <svg
-                  className="w-5 h-5"
-                  fill="currentColor"
-                  viewBox="0 0 20 20"
-                >
+                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                   <path d="M8.433 7.418c.155-.103.346-.196.567-.267v1.698a2.305 2.305 0 01-.567-.267C8.07 8.34 8 8.114 8 8c0-.114.07-.34.433-.582zM11 12.849v-1.698c.22.071.412.164.567.267.364.243.433.468.433.582 0 .114-.07.34-.433.582a2.305 2.305 0 01-.567.267z" />
                   <path
                     fillRule="evenodd"
@@ -1729,18 +1707,14 @@ const Semantix: React.FC = () => {
               color="pink"
               onClick={handleCommercialization}
               disabled={loadingStates.commercialization}
+              className="h-12"
             >
-              {loadingStates.commercialization
-                ? "Проверка..."
-                : "Проверка коммерциализации"}
+              {loadingStates.commercialization ? "Проверка..." : "Проверка коммерциализации"}
             </ActionButton>
+
             <ActionButton
               icon={
-                <svg
-                  className="w-5 h-5"
-                  fill="currentColor"
-                  viewBox="0 0 20 20"
-                >
+                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                   <path
                     fillRule="evenodd"
                     d="M12.395 2.553a1 1 0 00-1.45-.385c-.345.23-.614.558-.822.88-.214.33-.403.713-.57 1.116-.334.804-.614 1.768-.84 2.734a31.365 31.365 0 00-.613 3.58 2.64 2.64 0 01-.945-1.067c-.328-.68-.398-1.534-.398-2.654A1 1 0 005.05 6.05 6.981 6.981 0 003 11a7 7 0 1011.95-4.95c-.592-.591-.98-.985-1.348-1.467-.363-.476-.724-1.063-1.207-2.03zM12.12 15.12A3 3 0 017 13s.879.5 2.5.5c0-1 .5-4 1.25-4.5.5 1 .786 1.293 1.371 1.879A2.99 2.99 0 0113 13a2.99 2.99 0 01-.879 2.121z"
@@ -1751,16 +1725,14 @@ const Semantix: React.FC = () => {
               color="teal"
               onClick={handleClustering}
               disabled={loadingStates.clustering}
+              className="h-12"
             >
               {loadingStates.clustering ? "Кластеризация..." : "Кластеризация"}
             </ActionButton>
+
             <ActionButton
               icon={
-                <svg
-                  className="w-5 h-5"
-                  fill="currentColor"
-                  viewBox="0 0 20 20"
-                >
+                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                   <path
                     fillRule="evenodd"
                     d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z"
@@ -1771,16 +1743,14 @@ const Semantix: React.FC = () => {
               color="red"
               onClick={handleClearData}
               disabled={false}
+              className="h-12"
             >
               Очистить все данные
             </ActionButton>
+
             <ActionButton
               icon={
-                <svg
-                  className="w-5 h-5"
-                  fill="currentColor"
-                  viewBox="0 0 20 20"
-                >
+                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                   <path
                     fillRule="evenodd"
                     d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z"
@@ -1791,18 +1761,14 @@ const Semantix: React.FC = () => {
               color="blue"
               onClick={handleDownloadShortTable}
               disabled={loadingStates.downloadShort}
+              className="h-12"
             >
-              {loadingStates.downloadShort
-                ? "Скачивание..."
-                : "Выгрузить сокращенную таблицу"}
+              {loadingStates.downloadShort ? "Скачивание..." : "Выгрузить сокращенную таблицу"}
             </ActionButton>
+
             <ActionButton
               icon={
-                <svg
-                  className="w-5 h-5"
-                  fill="currentColor"
-                  viewBox="0 0 20 20"
-                >
+                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                   <path
                     fillRule="evenodd"
                     d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM6.293 6.707a1 1 0 010-1.414l3-3a1 1 0 011.414 0l3 3a1 1 0 01-1.414 1.414L11 5.414V13a1 1 0 11-2 0V5.414L7.707 6.707a1 1 0 01-1.414 0z"
@@ -1813,51 +1779,50 @@ const Semantix: React.FC = () => {
               color="emerald"
               onClick={handleDownloadFullTable}
               disabled={loadingStates.downloadFull}
+              className="h-12"
             >
-              {loadingStates.downloadFull
-                ? "Скачивание..."
-                : "Выгрузить всю таблицу"}
+              {loadingStates.downloadFull ? "Скачивание..." : "Выгрузить всю таблицу"}
             </ActionButton>
           </div>
-        </div>
 
-        {/* Сообщения */}
-        {error && (
-          <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
-            <p className={cn(typography.bodyText, "text-red-700")}>{error}</p>
-          </div>
-        )}
-        {message && (
-          <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
-            <p className={cn(typography.bodyText, "text-green-700")}>
-              {message}
-            </p>
-          </div>
-        )}
-        {/* Активные задачи */}
-        {activeTasks.length > 0 && (
-          <div className="bg-white rounded-lg p-6">
-            <h3 className={cn(typography.fieldLabel, "mb-4")}>
-              Активные задачи:
-            </h3>
-            <div className="space-y-3">
-              {activeTasks.map((task) => (
-                <div key={task.id}>
-                  <div className="flex justify-between items-center mb-2">
-                    <span className={cn(typography.bodyText, "font-medium")}>
-                      {task.name}
-                    </span>
-                    <span className={cn(typography.bodyText, "text-gray-600")}>
-                      {task.progress}%
-                    </span>
-                  </div>
-                  <ProgressBar progress={task.progress} color="red" />
-                </div>
-              ))}
+          {/* Сообщения об ошибках и успехе */}
+          {error && (
+            <div className="p-4 bg-red-50 border border-red-200 rounded-lg mt-4">
+              <p className={cn(typography.bodyText, "text-red-700")}>{error}</p>
             </div>
-          </div>
-        )}
+          )}
+          {message && (
+            <div className="p-4 bg-green-50 border border-green-200 rounded-lg mt-4">
+              <p className={cn(typography.bodyText, "text-green-700")}>
+                {message}
+              </p>
+            </div>
+          )}
 
+          {/* Активные задачи */}
+          {activeTasks.length > 0 && (
+            <div className="bg-white rounded-lg p-6 mt-4">
+              <h3 className={cn(typography.fieldLabel, "mb-4")}>
+                Активные задачи:
+              </h3>
+              <div className="space-y-3">
+                {activeTasks.map((task) => (
+                  <div key={task.id}>
+                    <div className="flex justify-between items-center mb-2">
+                      <span className={cn(typography.bodyText, "font-medium")}>
+                        {task.name}
+                      </span>
+                      <span className={cn(typography.bodyText, "text-gray-600")}>
+                        {task.progress}%
+                      </span>
+                    </div>
+                    <ProgressBar progress={task.progress} color="red" />
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
 
         {/* 8. Блок «Управление таблицей» */}
         <div className="bg-white rounded-lg p-6">

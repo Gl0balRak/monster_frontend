@@ -49,7 +49,7 @@ export const ActionButton: React.FC<ActionButtonProps> = ({
       onClick={disabled ? undefined : onClick}
       disabled={disabled}
       className={cn(
-        "inline-flex items-center gap-3 px-6 py-4 rounded-lg text-white font-medium transition-colors duration-200",
+        "inline-flex items-center justify-center gap-3 px-6 py-4 rounded-lg text-white font-medium transition-colors duration-200",
         "text-base leading-tight min-h-[56px]",
         disabled
           ? "opacity-50 cursor-not-allowed bg-gray-400"

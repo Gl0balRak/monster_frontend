@@ -195,6 +195,47 @@ const ChevronDownIcon = () => (
   </svg>
 );
 
+const QueryIndexIcon = () => (
+  <svg
+    width="24"
+    height="24"
+    viewBox="0 0 24 24"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <path
+      fillRule="evenodd"
+      clipRule="evenodd"
+      d="M3 3C3 2.44772 3.44772 2 4 2H20C20.5523 2 21 2.44772 21 3V21C21 21.5523 20.5523 22 20 22H4C3.44772 22 3 21.5523 3 21V3ZM5 4V20H19V4H5Z"
+      fill="currentColor"
+    />
+    <path
+      fillRule="evenodd"
+      clipRule="evenodd"
+      d="M7 15C7 14.4477 7.44772 14 8 14H9C9.55228 14 10 14.4477 10 15V17C10 17.5523 9.55228 18 9 18H8C7.44772 18 7 17.5523 7 17V15Z"
+      fill="currentColor"
+    />
+    <path
+      fillRule="evenodd"
+      clipRule="evenodd"
+      d="M11 12C11 11.4477 11.4477 11 12 11H13C13.5523 11 14 11.4477 14 12V17C14 17.5523 13.5523 18 13 18H12C11.4477 18 11 17.5523 11 17V12Z"
+      fill="currentColor"
+    />
+    <path
+      fillRule="evenodd"
+      clipRule="evenodd"
+      d="M15 9C15 8.44772 15.4477 8 16 8H17C17.5523 8 18 8.44772 18 9V17C18 17.5523 17.5523 18 17 18H16C15.4477 18 15 17.5523 15 17V9Z"
+      fill="currentColor"
+    />
+  </svg>
+);
+
+const LinkAnalyzerIcon = () => (
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+    <path stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" d="M13.5 10.5L21 3m-5 0h5v5m0 6v5a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5"/>
+  </svg>
+)
+
 interface MenuItem {
   id: string;
   label: string;
@@ -225,12 +266,12 @@ const menuItems: MenuItem[] = [
       {
         id: "query-index",
         label: "Прокачка запросного индекса",
-        icon: <CheckIcon />,
+        icon: <QueryIndexIcon />,
       },
       {
         id: "link-analyzer",
         label: "Анализ ссылок",
-        icon: <CheckIcon />,
+        icon: <LinkAnalyzerIcon />,
       },
     ],
   },
@@ -263,6 +304,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
   const [expandedItems, setExpandedItems] = React.useState<string[]>([
     "services",
   ]);
+  const [isHovered, setIsHovered] = React.useState(false);
+  const [isPinned, setIsPinned] = React.useState(() => {
+    const saved = localStorage.getItem('sidebar-pinned');
+    return saved ? JSON.parse(saved) : false;
+  });
 
   const toggleExpanded = (itemId: string) => {
     setExpandedItems((prev) =>
@@ -272,21 +318,89 @@ export const Sidebar: React.FC<SidebarProps> = ({
     );
   };
 
-  return (
-    <aside className="w-[360px] h-[calc(100vh-59px)] bg-gray-0 p-4 flex flex-col gap-1.5">
-      {/* Hide menu button */}
-      {/*<div className="bg-white rounded-lg">*/}
-      {/*  <div className="flex items-center justify-between p-3">*/}
-      {/*    <span className={cn(typography.bodyText)}>*/}
-      {/*      Скрыть меню*/}
-      {/*    </span>*/}
-      {/*    <CloseIcon />*/}
-      {/*  </div>*/}
-      {/*</div>*/}
+  const handleMouseEnter = () => {
+    if (!isPinned) {
+      setIsHovered(true);
+    }
+  };
 
+  const handleMouseLeave = () => {
+    if (!isPinned) {
+      setExpandedItems([]);
+      setTimeout(() => {
+        setIsHovered(false);
+      }, 150);
+    }
+  };
+
+  const togglePin = () => {
+    const newPinnedState = !isPinned;
+    setIsPinned(newPinnedState);
+    
+    localStorage.setItem('sidebar-pinned', JSON.stringify(newPinnedState));
+    
+    if (newPinnedState) {
+      setIsHovered(true);
+    }
+  };
+
+  const PinIcon = () => (
+  <svg
+    width="16"
+    height="16"
+    viewBox="0 0 16 16"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <path
+      fillRule="evenodd"
+      clipRule="evenodd"
+      d="M5 7V5C5 3.34315 6.34315 2 8 2C9.65685 2 11 3.34315 11 5V7H12C12.5523 7 13 7.44772 13 8V12C13 12.5523 12.5523 13 12 13H4C3.44772 13 3 12.5523 3 12V8C3 7.44772 3.44772 7 4 7H5ZM7 5C7 4.44772 7.44772 4 8 4C8.55228 4 9 4.44772 9 5V7H7V5Z"
+      fill={isPinned ? "#495057" : "#868E96"}
+    />
+  </svg>
+);
+
+  return (
+    <aside 
+      className={cn(
+        "h-[calc(100vh-59px)] bg-gray-0 p-4 flex flex-col gap-1.5 transition-all duration-300 ease-in-out relative overflow-hidden",
+        {
+          "w-[360px]": isHovered || isPinned,
+          "w-[80px]": !isHovered && !isPinned,
+        }
+      )}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+      style={{
+        transformOrigin: 'left center',
+      }}
+    >
       {/* Navigation menu */}
-      <div className="bg-white rounded-lg p-2 flex-1">
-        <nav className="space-y-1">
+      <div className="bg-white rounded-lg p-2 flex-1 overflow-hidden relative">
+        <div className={cn(
+          "absolute top-2 right-2 transition-opacity duration-200 z-10",
+          {
+            "opacity-100": isHovered || isPinned,
+            "opacity-0": !isHovered && !isPinned,
+          }
+        )}>
+          <button
+            onClick={togglePin}
+            className={cn(
+              "p-2 rounded-lg transition-all duration-200 hover:bg-gray-100",
+              {
+                "bg-gray-100": isPinned,
+                "bg-transparent": !isPinned,
+              }
+            )}
+            title={isPinned ? "Открепить меню" : "Закрепить меню"}
+          >
+            <PinIcon />
+          </button>
+        </div>
+
+        <nav className="space-y-1 pt-8">
           {menuItems.map((item) => (
             <div key={item.id}>
               <button
@@ -298,16 +412,14 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   }
                 }}
                 className={cn(
-                  "w-full flex items-center gap-2 p-3 rounded text-left",
+                  "w-full flex items-center rounded text-left py-3 pr-3 pl-[5px]",
                   commonClasses.transition,
                   commonClasses.font,
                   "font-normal text-sm",
                   {
-                    // Красный цвет для активной группы или активного элемента
                     "text-red-9":
                       (item.subItems && currentPage.startsWith(item.id)) ||
                       (!item.subItems && currentPage === item.id),
-                    // Черный цвет для неактивных элементов
                     "text-black": !(
                       (item.subItems && currentPage.startsWith(item.id)) ||
                       (!item.subItems && currentPage === item.id)
@@ -317,7 +429,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 )}
               >
                 <span
-                  className={cn({
+                  className={cn("flex-shrink-0",{
                     "text-red-9":
                       (item.subItems && currentPage.startsWith(item.id)) ||
                       (!item.subItems && currentPage === item.id),
@@ -329,54 +441,87 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 >
                   {item.icon}
                 </span>
-                <span className="flex-1">{item.label}</span>
+                
+                <span className={cn(
+                  "flex-1 ml-3 whitespace-nowrap transition-opacity duration-150",
+                  {
+                    "opacity-100": isHovered || isPinned,
+                    "opacity-0": !isHovered && !isPinned,
+                  }
+                )}>
+                  {item.label}
+                </span>
+                
                 {item.subItems && (
-                  <span>
-                    {expandedItems.includes(item.id) ? (
-                      <ChevronUpIcon />
-                    ) : (
-                      <ChevronDownIcon />
+                  <span
+                    className={cn(
+                      "transition-all duration-300 ease-in-out ml-2",
+                      {
+                        "rotate-180": expandedItems.includes(item.id),
+                        "opacity-100": isHovered || isPinned,
+                        "opacity-0": !isHovered && !isPinned,
+                      },
                     )}
+                  >
+                    <ChevronUpIcon />
                   </span>
                 )}
               </button>
 
-              {/* Sub items */}
-              {item.subItems && expandedItems.includes(item.id) && (
-                <div className="ml-8 mt-1 space-y-1">
-                  {item.subItems.map((subItem) => (
-                    <button
-                      key={subItem.id}
-                      onClick={() => onPageChange(subItem.id)}
-                      className={cn(
-                        "w-full flex items-center gap-2 p-3 rounded text-left",
-                        commonClasses.transition,
-                        commonClasses.font,
-                        "font-normal text-sm",
-                        {
-                          "text-red-9 bg-red-0": currentPage === subItem.id,
-                          "text-black hover:bg-gray-0":
-                            currentPage !== subItem.id,
-                        },
-                      )}
-                    >
-                      <span
-                        className={cn({
-                          "text-red-9": currentPage === subItem.id,
-                          "text-[#868E96]": currentPage !== subItem.id,
-                        })}
+              {item.subItems && (isHovered || isPinned) && (
+                <div
+                  className={cn(
+                    "overflow-hidden transition-all duration-200 ease-in-out",
+                    {
+                      "max-h-0 opacity-0": !expandedItems.includes(item.id),
+                      "max-h-96 opacity-100": expandedItems.includes(item.id),
+                    },
+                  )}
+                >
+                  <div className="ml-8 mt-1 space-y-1">
+                    {item.subItems.map((subItem) => (
+                      <button
+                        key={subItem.id}
+                        onClick={() => onPageChange(subItem.id)}
+                        className={cn(
+                          "w-full flex items-center p-3 rounded text-left",
+                          commonClasses.transition,
+                          commonClasses.font,
+                          "font-normal text-sm",
+                          {
+                            "text-red-9 bg-red-0": currentPage === subItem.id,
+                            "text-black hover:bg-gray-0":
+                              currentPage !== subItem.id,
+                          },
+                        )}
                       >
-                        {subItem.icon}
-                      </span>
-                      <span className="flex-1">{subItem.label}</span>
-                    </button>
-                  ))}
+                        <span
+                          className={cn("flex-shrink-0",{
+                            "text-red-9": currentPage === subItem.id,
+                            "text-[#868E96]": currentPage !== subItem.id,
+                          })}
+                        >
+                          {subItem.icon}
+                        </span>
+                        <span className={cn(
+                          "flex-1 ml-3 whitespace-nowrap transition-opacity duration-150",
+                          {
+                            "opacity-100": isHovered || isPinned,
+                            "opacity-0": !isHovered && !isPinned,
+                          }
+                        )}>
+                          {subItem.label}
+                        </span>
+                      </button>
+                    ))}
+                  </div>
                 </div>
               )}
             </div>
           ))}
         </nav>
-        <BackToTopButton />
+        
+        {(isHovered || isPinned) && <BackToTopButton />}
       </div>
     </aside>
   );

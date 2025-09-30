@@ -1,29 +1,39 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { UserProfileCard } from "@/components/cards/UserProfileCard";
 import { StatsCards } from "@/components/cards/StatsCards";
 import { CreditsPurchase } from "@/components/cards/CreditsPurchase";
 import { TariffCards } from "@/components/cards/TariffCards";
-import { DocumentIcon } from "@/components/layout/Sidebar"
+import { DocumentIcon } from "@/components/layout/Sidebar";
 import { TransactionHistory } from "@/components/ui//TransactionHistory";
 import { useAuth } from "@/hooks/useAuth.jsx";
 import { API_ENDPOINTS } from "@/config/api.config.js";
+import { ConfirmationDialog } from "@/components/ui/ConfirmationDialog";
+import { toast } from "sonner";
 
 interface PersonalAccountContentProps {
   onLogout?: () => void;
 }
 
 export const PersonalAccountContent: React.FC<PersonalAccountContentProps> = ({
-                                                                                onLogout,
-                                                                              }) => {
+  onLogout,
+}) => {
   const { user, logout } = useAuth();
   const [userInfo, setUserInfo] = useState<any>(null);
   const [credits, setCredits] = useState("-");
-  const [selectedTariff, setSelectedTariff] = useState("novice");
+  const [selectedTariff, setSelectedTariff] = useState<string | undefined>(
+    undefined,
+  );
+  const [currentTariffId, setCurrentTariffId] = useState<string | undefined>(
+    undefined,
+  );
+  const [tariffItems, setTariffItems] = useState<any[]>([]);
   const [transactions, setTransactions] = useState([]);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [isChanging, setIsChanging] = useState(false);
 
-  // Получаем информацию о пользователе с API
+  // Получаем информацию о пользователе и тариф�� с API
   useEffect(() => {
-    const fetchUserInfo = async () => {
+    const fetchData = async () => {
       if (!user) return;
 
       try {
@@ -71,25 +81,54 @@ export const PersonalAccountContent: React.FC<PersonalAccountContentProps> = ({
 
         if (response.ok) {
           const data = await response.json();
-          console.log(data);
-
-          let new_transactions = data["operations_log"].map(operation => ({
+          let new_transactions = data["operations_log"].map(
+            (operation: any) => ({
               id: operation.id,
               amount: operation.amount,
               type: operation.entry_type,
-              date: new Date(operation.created_at)
-          }));
-
-          console.log(new_transactions);
-          console.log(data["operations_log"]);
+              date: new Date(operation.created_at),
+            }),
+          );
           setTransactions(new_transactions);
         }
       } catch (error) {
         console.error("Failed to fetch user transaction history:", error);
       }
+
+      try {
+        const response = await fetch(API_ENDPOINTS.payment.tariffs.list, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+          },
+        });
+        if (response.ok) {
+          const tariffs = await response.json();
+          const active = tariffs.find((t: any) => t.is_active);
+          setCurrentTariffId(active?.id);
+          setSelectedTariff(active?.id);
+          const mapped = tariffs.map((t: any, idx: number) => ({
+            id: t.id,
+            name: t.name,
+            price: t.limit_cost ? `${t.limit_cost} ₽` : undefined,
+            features: [
+              t.base_limits != null ? `Базовый лимит: ${t.base_limits}` : "",
+            ].filter(Boolean),
+            isActive: !!t.is_active,
+          }));
+          setTariffItems(mapped);
+        } else if (response.status === 404) {
+          setCurrentTariffId(undefined);
+          setSelectedTariff(undefined);
+          setTariffItems([]);
+        }
+      } catch (error) {
+        console.error("Failed to fetch tariffs:", error);
+      }
     };
 
-    fetchUserInfo();
+    fetchData();
   }, [user]);
 
   const handleLogout = async () => {
@@ -109,17 +148,84 @@ export const PersonalAccountContent: React.FC<PersonalAccountContentProps> = ({
   };
 
   const handlePurchase = (amount: number) => {
-    setCredits((prev) => prev + amount);
-    console.log(`Покупка ${amount} лимитов`);
+    setCredits((prev: any) =>
+      typeof prev === "number" ? prev + amount : amount,
+    );
   };
 
   const handleTariffChange = (tariffId: string) => {
     setSelectedTariff(tariffId);
-    console.log(`Выбран тариф: ${tariffId}`);
   };
 
   const handleChangeTariff = () => {
-    console.log("Смена тарифа");
+    if (!selectedTariff) {
+      toast("Выберите тариф для подключения");
+      return;
+    }
+    if (currentTariffId && selectedTariff === currentTariffId) {
+      toast("Этот тариф уже активен");
+      return;
+    }
+    setConfirmOpen(true);
+  };
+
+  const confirmTariffChange = async () => {
+    if (!selectedTariff) return;
+    try {
+      setIsChanging(true);
+      const response = await fetch(API_ENDPOINTS.payment.tariffs.change, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+        },
+        body: JSON.stringify({ new_tariff_id: selectedTariff }),
+      });
+
+      const payload = await response.json().catch(() => ({}));
+
+      if (typeof payload?.success !== "undefined") {
+        if (payload.success) {
+          toast.success("Тариф успешно изменен");
+        } else {
+          toast.error(payload.detail || "Не удалось изменить тариф");
+          return;
+        }
+      } else if (!response.ok) {
+        toast.error(payload?.detail || "Не удалось изменить тариф");
+        return;
+      } else {
+        toast.success("Тариф успешно изменен");
+      }
+
+      // Обновляем список тарифов
+      const listResp = await fetch(API_ENDPOINTS.payment.tariffs.list, {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+        },
+      });
+      if (listResp.ok) {
+        const tariffs = await listResp.json();
+        const active = tariffs.find((t: any) => t.is_active);
+        setCurrentTariffId(active?.id);
+        setSelectedTariff(active?.id);
+        const mapped = tariffs.map((t: any) => ({
+          id: t.id,
+          name: t.name,
+          price: t.limit_cost ? `${t.limit_cost} ₽` : undefined,
+          features: [
+            t.base_limits != null ? `Базовый лимит: ${t.base_limits}` : "",
+          ].filter(Boolean),
+          isActive: !!t.is_active,
+        }));
+        setTariffItems(mapped);
+      }
+    } catch (e) {
+      toast.error("Ошибка при смене тарифа");
+    } finally {
+      setIsChanging(false);
+    }
   };
 
   const handleViewAllTransactions = () => {
@@ -164,7 +270,7 @@ export const PersonalAccountContent: React.FC<PersonalAccountContentProps> = ({
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Покупка кредитов */}
           <div className="lg:col-span-1">
-            <CreditsPurchase onPurchase={handlePurchase} />
+            <CreditsPurchase onPurchase={handlePurchase} disabled={!currentTariffId} />
           </div>
 
           {/* Тарифы и журнал */}
@@ -173,6 +279,7 @@ export const PersonalAccountContent: React.FC<PersonalAccountContentProps> = ({
               selectedTariff={selectedTariff}
               onTariffChange={handleTariffChange}
               onChangeTariff={handleChangeTariff}
+              items={tariffItems}
             />
 
             <TransactionHistory
@@ -182,11 +289,23 @@ export const PersonalAccountContent: React.FC<PersonalAccountContentProps> = ({
           </div>
         </div>
 
+        <ConfirmationDialog
+          open={confirmOpen}
+          onOpenChange={setConfirmOpen}
+          title="Подтверждение смены тарифа"
+          description="Вы уверены, что хотите изменить тариф? Оплата будет произведена позже."
+          confirmText={isChanging ? "Сохранение..." : "Подтвердить"}
+          cancelText="Отменить"
+          onConfirm={confirmTariffChange}
+          variant="default"
+        />
+
         {/* Подвал с документами */}
         <footer className="mt-16 pt-8 border-t border-gray-200">
           <div className="flex flex-col items-center text-center space-y-4">
             <div className="text-sm text-gray-500">
-              Нажимая на кнопки покупки услуг, вы соглашаетесь с условиями оферты
+              Нажимая на кнопки покупки услуг, вы соглашаетесь с условиями
+              оферты
             </div>
 
             <a

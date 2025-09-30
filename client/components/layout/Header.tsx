@@ -191,7 +191,7 @@ export const Header: React.FC<HeaderProps> = ({ onPageChange }) => {
             </AvatarFallback>
           </Avatar>
           <div className="flex flex-col items-start">
-            <span className="text-sm font-semibold text-gray-900 leading-tight">
+            <span className="text-sm font-semibold text-gray-900 leading-tight justify-center">
               {getUserDisplayName()}
             </span>
             {userInfo?.email && (
