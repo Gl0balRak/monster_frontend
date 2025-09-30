@@ -343,6 +343,15 @@ export const semantixApi = {
     return apiCall("/semantix/service/regions");
   },
 
+  // Стоимость операции
+  async getOperationCost(params: { amount: number; operation_type: number }): Promise<OperationCostResponse> {
+    const query = new URLSearchParams({
+      amount: String(params.amount ?? 0),
+      operation_type: String(params.operation_type ?? 1),
+    }).toString();
+    return apiCall<OperationCostResponse>(`/operation_cost?${query}`);
+  },
+
   // Очистка всех данных
   async clearKeywords(): Promise<ParseResponse> {
     return apiCall<ParseResponse>("/semantix/service/keywords/clear", {
