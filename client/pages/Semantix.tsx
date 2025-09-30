@@ -741,7 +741,7 @@ const Semantix: React.FC = () => {
     setNewGroupDialog({
       open: true,
       title: "Создание группы",
-      description: `Введите название группы для ${selectedTableRows.length} выбранны�� строк:`,
+      description: `Введите название группы для ${selectedTableRows.length} выбранных строк:`,
       onConfirm: async (groupName) => {
         const rowIds = selectedTableRows.map((id) => parseInt(id));
         await bulkUpdateKeywordGroup(rowIds, groupName, region, websiteUrl);
@@ -1300,7 +1300,7 @@ const Semantix: React.FC = () => {
                 onChange={(checked) => handleServiceChange("bukvarix", checked)}
               />
               <Checkbox
-                label="Яндекс.Метрика (необходима авторизация)"
+                label="Яндекс.Метрика (необходима авторизац��я)"
                 checked={selectedServices.yandexMetrika}
                 onChange={(checked) =>
                   handleServiceChange("yandexMetrika", checked)
@@ -1540,7 +1540,7 @@ const Semantix: React.FC = () => {
             />
             <Textarea
               label="Исключение городов"
-              placeholder="Введит�� города для исключения через запятую или с новой строки. Эти города не будут исключаться при выборе параметра чистки «Города РФ». Например, если вы хотите, чтобы были исключены все города, кроме Санкт-Петербурга, то в этом поле укажите Санкт-Петербург, а также все подходящие формы его названия, например: «Санкт-Петербург, СПб»."
+              placeholder="Введите города для исключения через запятую или с новой строки. Эти города не будут исключаться при выборе параметра чистки «Города РФ». Например, если вы хотите, чтобы были исключены все города, кроме Санкт-Петербурга, то в этом поле укажите Санкт-Петербург, а также все подходящие формы его названия, например: «Санкт-Петербург, СПб»."
               value={cityExclusions}
               onChange={setCityExclusions}
               rows={4}
@@ -1591,7 +1591,7 @@ const Semantix: React.FC = () => {
                 }
               />
               <Checkbox
-                label="Однословники (удаляет фра��ы из 1 слова)"
+                label="Однословники (удаляет фразы из 1 слова)"
                 checked={cleaningParams.singleWords}
                 onChange={(checked) =>
                   handleCleaningParamChange("singleWords", checked)
@@ -1670,19 +1670,22 @@ const Semantix: React.FC = () => {
                 <span className={cn(typography.helperText, "mt-1")}>0 л.</span>
               </div>
             </div>
-            <ActionButton
-              icon={
-                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                  <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                </svg>
-              }
-              color="green"
-              onClick={handleSearchSuggestions}
-              disabled={loadingStates.searchSuggestions}
-              className="h-12"
-            >
-              {loadingStates.searchSuggestions ? "Выгрузка..." : "Выгрузить поисковые подсказки"}
-            </ActionButton>
+            <div className="flex flex-col">
+              <ActionButton
+                icon={
+                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                  </svg>
+                }
+                color="green"
+                onClick={handleSearchSuggestions}
+                disabled={loadingStates.searchSuggestions}
+                className="h-12"
+              >
+                {loadingStates.searchSuggestions ? "Выгрузка..." : "Выгрузить поисковые подсказки"}
+              </ActionButton>
+              <span className={cn(typography.helperText, "mt-1")}>{operationCosts[4] != null ? `${operationCosts[4]} л.` : "0 л."}</span>
+            </div>
 
             <ActionButton
               icon={
@@ -1802,7 +1805,7 @@ const Semantix: React.FC = () => {
               disabled={loadingStates.downloadShort}
               className="h-12"
             >
-              {loadingStates.downloadShort ? "Скачивание..." : "Выгрузить с��кращенную таблицу"}
+              {loadingStates.downloadShort ? "Скачивание..." : "Выгрузить сокращенную таблицу"}
             </ActionButton>
 
             <ActionButton
