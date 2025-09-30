@@ -616,7 +616,7 @@ const Semantix: React.FC = () => {
     setGroupSelectionDialog({
       open: true,
       title: "Выберите группу",
-      description: "К какой группе применить загрузку спроса и кликов?",
+      description: "�� какой группе применить загрузку спроса и кликов?",
       onConfirm: (selectedGroup) => {
         const groupKeywords =
           selectedGroup === "Не корзина"
@@ -878,14 +878,14 @@ const Semantix: React.FC = () => {
       label: "W",
       sortable: true,
       sortType: "number",
-      tooltip: "Количество запросов в месяц (частотность) в Яндекс.Вордстат",
+      tooltip: "Количество запросов в месяц (ча��тотность) в Яндекс.Вордстат",
     },
     {
       key: "wQuotes",
       label: '"W"',
       sortable: true,
       sortType: "number",
-      tooltip: "Точная частотность запроса в кавычках в Яндекс.Вордстат",
+      tooltip: "Точная частотность запроса в кавычках в Ян��екс.Вордстат",
     },
     {
       key: "wNot",
@@ -1300,7 +1300,7 @@ const Semantix: React.FC = () => {
                 onChange={(checked) => handleServiceChange("bukvarix", checked)}
               />
               <Checkbox
-                label="Яндекс.Метрика (необходима авторизац��я)"
+                label="Яндекс.Метрика (необходима авторизация)"
                 checked={selectedServices.yandexMetrika}
                 onChange={(checked) =>
                   handleServiceChange("yandexMetrika", checked)
@@ -1517,7 +1517,7 @@ const Semantix: React.FC = () => {
               onChange={setParseNotW}
             />
             <Checkbox
-              label='Парсить "W" (точное вхождение)'
+              label='Парсить "W" (точное вхож��ение)'
               checked={parseWQuoted}
               onChange={setParseWQuoted}
             />
@@ -1687,20 +1687,23 @@ const Semantix: React.FC = () => {
               <span className={cn(typography.helperText, "mt-1")}>{operationCosts[4] != null ? `${operationCosts[4]} л.` : "0 л."}</span>
             </div>
 
-            <ActionButton
-              icon={
-                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                  <path d="M2 10a8 8 0 018-8v8h8a8 8 0 11-16 0z" />
-                  <path d="M12 2.252A8.014 8.014 0 0117.748 8H12V2.252z" />
-                </svg>
-              }
-              color="darkBlue"
-              onClick={handleFrequencies}
-              disabled={loadingStates.frequencies}
-              className="h-12"
-            >
-              {loadingStates.frequencies ? "Парсинг..." : "Парсинг частот"}
-            </ActionButton>
+            <div className="flex flex-col">
+              <ActionButton
+                icon={
+                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M2 10a8 8 0 018-8v8h8a8 8 0 11-16 0z" />
+                    <path d="M12 2.252A8.014 8.014 0 0117.748 8H12V2.252z" />
+                  </svg>
+                }
+                color="darkBlue"
+                onClick={handleFrequencies}
+                disabled={loadingStates.frequencies}
+                className="h-12"
+              >
+                {loadingStates.frequencies ? "Парсинг..." : "Парсинг частот"}
+              </ActionButton>
+              <span className={cn(typography.helperText, "mt-1")}>{operationCosts[2] != null ? `${operationCosts[2]} л.` : "0 л."}</span>
+            </div>
 
             <ActionButton
               icon={
@@ -1751,7 +1754,7 @@ const Semantix: React.FC = () => {
               disabled={loadingStates.commercialization}
               className="h-12"
             >
-              {loadingStates.commercialization ? "Проверка..." : "Проверка коммерциализации"}
+              {loadingStates.commercialization ? "Проверка..." : "Проверка коммерциализаци��"}
             </ActionButton>
 
             <ActionButton
@@ -2146,7 +2149,7 @@ const Semantix: React.FC = () => {
                 />
                 <div className="space-y-2">
                   <label className={cn(typography.fieldLabel)}>
-                    Коммерция (%)
+                    Коммерц��я (%)
                   </label>
                   <div className="flex gap-2">
                     <Input
