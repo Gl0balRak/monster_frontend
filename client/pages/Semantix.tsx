@@ -96,7 +96,7 @@ const Semantix: React.FC = () => {
   const [parseNotW, setParseNotW] = useState(false);
   const [parseWQuoted, setParseWQuoted] = useState(false);
 
-  // Управле��ие таблице��
+  // Управление таблице��
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState("25");
   const [selectedTableRows, setSelectedTableRows] = useState<string[]>([]);
@@ -595,7 +595,7 @@ const Semantix: React.FC = () => {
         setConfirmDialog({
           open: true,
           title: "Подтвердите операцию",
-          description: `Парсинг ч��стот будет применен к группе "${selectedGroup}" (${groupKeywords} ключевых слов). Продолжить?`,
+          description: `Парсинг частот будет применен к группе "${selectedGroup}" (${groupKeywords} ключевых слов). Продолжить?`,
           onConfirm: async () => {
             await parseFrequencies({
               region,
@@ -732,7 +732,7 @@ const Semantix: React.FC = () => {
       setConfirmDialog({
         open: true,
         title: "Ошибка",
-        description: "Выберит�� строки для обновления",
+        description: "Выберите строки для обновления",
         onConfirm: () => {},
       });
       return;
@@ -771,7 +771,7 @@ const Semantix: React.FC = () => {
       setConfirmDialog({
         open: true,
         title: "Ошибка",
-        description: "Введите ключевые слов�� или выберите файл",
+        description: "Введите ключевые слова или выберите файл",
         onConfirm: () => {},
       });
       return;
@@ -864,7 +864,7 @@ const Semantix: React.FC = () => {
       sortable: true,
       sortType: "string",
       tooltip:
-        "Тематическая группа запросов для удобной ��рганизации семантического ядра",
+        "Тематическая группа запросов для удобной организации семантического ядра",
     },
     {
       key: "position",
@@ -878,7 +878,7 @@ const Semantix: React.FC = () => {
       label: "W",
       sortable: true,
       sortType: "number",
-      tooltip: "Количество запросов в месяц (частотность) в Яндекс.Вордстат",
+      tooltip: "Количество запросов в м��сяц (частотность) в Яндекс.Вордстат",
     },
     {
       key: "wQuotes",
@@ -937,7 +937,7 @@ const Semantix: React.FC = () => {
     wNot: keyword.not_w?.toString() || "0",
     demand: keyword.demand?.toString() || "0",
     clicks: keyword.clicks?.toString() || "0",
-    competition: keyword.competition || "Нет д��нных",
+    competition: keyword.competition || "Нет данных",
     commerce: keyword.commerce ? `${keyword.commerce}%` : "0%",
   }));
 
@@ -1533,14 +1533,14 @@ const Semantix: React.FC = () => {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
             <Textarea
               label="Стоп-слова"
-              placeholder="Введит�� стоп-слова через запятую или с новой строки"
+              placeholder="Введите стоп-слова через запятую или с новой строки"
               value={stopWords}
               onChange={setStopWords}
               rows={4}
             />
             <Textarea
               label="Исключение городов"
-              placeholder="Введите города для исключения через запятую или с новой строки. Эти города не будут исключаться при выборе параметра чистки «Города РФ». Например, если вы хотите, чтобы были исключены все города, кроме Санкт-Петербурга, то в этом поле укажите Санкт-Петербург, а также все подходящие формы его названия, например: «Санкт-Петербург, СПб»."
+              placeholder="Введите города для исключения через запятую или с новой строки. Эти города не будут исключаться при вы��оре параметра чистки «Города РФ». Например, если вы хотите, чтобы были исключены все города, кроме Санкт-Петербурга, то в этом поле укажите Санкт-Петербург, а также все подходящие формы его названия, например: «Санкт-Петербург, СПб»."
               value={cityExclusions}
               onChange={setCityExclusions}
               rows={4}
@@ -1584,7 +1584,7 @@ const Semantix: React.FC = () => {
                 }
               />
               <Checkbox
-                label="Стоп-слова (пои��к вхождения)"
+                label="Стоп-слова (поиск вхождения)"
                 checked={cleaningParams.stopWords}
                 onChange={(checked) =>
                   handleCleaningParamChange("stopWords", checked)
@@ -1744,24 +1744,27 @@ const Semantix: React.FC = () => {
               <span className={cn(typography.helperText, "mt-1")}>{operationCosts[5] != null ? `${operationCosts[5]} л.` : "0 л."}</span>
             </div>
 
-            <ActionButton
-              icon={
-                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                  <path d="M8.433 7.418c.155-.103.346-.196.567-.267v1.698a2.305 2.305 0 01-.567-.267C8.07 8.34 8 8.114 8 8c0-.114.07-.34.433-.582zM11 12.849v-1.698c.22.071.412.164.567.267.364.243.433.468.433.582 0 .114-.07.34-.433.582a2.305 2.305 0 01-.567.267z" />
-                  <path
-                    fillRule="evenodd"
-                    d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-13a1 1 0 10-2 0v.092a4.535 4.535 0 00-1.676.662C6.602 6.234 6 7.009 6 8c0 .99.602 1.765 1.324 2.246.48.32 1.054.545 1.676.662v1.941c-.391-.127-.68-.317-.843-.504a1 1 0 10-1.51 1.31c.562.649 1.413 1.076 2.353 1.253V15a1 1 0 102 0v-.092a4.535 4.535 0 001.676-.662C13.398 13.766 14 12.991 14 12c0-.99-.602-1.765-1.324-2.246A4.535 4.535 0 0011 9.092V7.151c.391.127.68.317.843.504a1 1 0 101.511-1.31c-.563-.649-1.413-1.076-2.354-1.253V5z"
-                    clipRule="evenodd"
-                  />
-                </svg>
-              }
-              color="pink"
-              onClick={handleCommercialization}
-              disabled={loadingStates.commercialization}
-              className="h-12"
-            >
-              {loadingStates.commercialization ? "Проверка..." : "Проверка коммерциализации"}
-            </ActionButton>
+            <div className="flex flex-col">
+              <ActionButton
+                icon={
+                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M8.433 7.418c.155-.103.346-.196.567-.267v1.698a2.305 2.305 0 01-.567-.267C8.07 8.34 8 8.114 8 8c0-.114.07-.34.433-.582zM11 12.849v-1.698c.22.071.412.164.567.267.364.243.433.468.433.582 0 .114-.07.34-.433.582a2.305 2.305 0 01-.567.267z" />
+                    <path
+                      fillRule="evenodd"
+                      d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-13a1 1 0 10-2 0v.092a4.535 4.535 0 00-1.676.662C6.602 6.234 6 7.009 6 8c0 .99.602 1.765 1.324 2.246.48.32 1.054.545 1.676.662v1.941c-.391-.127-.68-.317-.843-.504a1 1 0 10-1.51 1.31c.562.649 1.413 1.076 2.353 1.253V15a1 1 0 102 0v-.092a4.535 4.535 0 001.676-.662C13.398 13.766 14 12.991 14 12c0-.99-.602-1.765-1.324-2.246A4.535 4.535 0 0011 9.092V7.151c.391.127.68.317.843.504a1 1 0 101.511-1.31c-.563-.649-1.413-1.076-2.354-1.253В5z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                }
+                color="pink"
+                onClick={handleCommercialization}
+                disabled={loadingStates.commercialization}
+                className="h-12"
+              >
+                {loadingStates.commercialization ? "Проверка..." : "Проверка коммерциализации"}
+              </ActionButton>
+              <span className={cn(typography.helperText, "mt-1")}>{operationCosts[6] != null ? `${operationCosts[6]} л.` : "0 л."}</span>
+            </div>
 
             <ActionButton
               icon={
@@ -1778,7 +1781,7 @@ const Semantix: React.FC = () => {
               disabled={loadingStates.clustering}
               className="h-12"
             >
-              {loadingStates.clustering ? "Кластеризация..." : "Кластеризация"}
+              {loadingStates.clustering ? "Кластериза��ия..." : "Кластеризация"}
             </ActionButton>
 
             <ActionButton
