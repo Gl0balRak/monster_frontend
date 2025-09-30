@@ -42,6 +42,10 @@ export interface Region {
   label: string;
 }
 
+export interface OperationCostResponse {
+  cost: number;
+}
+
 // Мок-функция для получения токена
 const getAuthToken = () => "Bearer " + localStorage.getItem("access_token");
 
