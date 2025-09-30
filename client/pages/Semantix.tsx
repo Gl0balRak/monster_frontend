@@ -741,7 +741,7 @@ const Semantix: React.FC = () => {
     setNewGroupDialog({
       open: true,
       title: "Создание группы",
-      description: `Введите название группы для ${selectedTableRows.length} выбранных строк:`,
+      description: `Введите название группы для ${selectedTableRows.length} выбранны�� строк:`,
       onConfirm: async (groupName) => {
         const rowIds = selectedTableRows.map((id) => parseInt(id));
         await bulkUpdateKeywordGroup(rowIds, groupName, region, websiteUrl);
@@ -1295,7 +1295,7 @@ const Semantix: React.FC = () => {
                 onChange={(checked) => handleServiceChange("keyso", checked)}
               />
               <Checkbox
-                label="Буквар��кс"
+                label="Букварикс"
                 checked={selectedServices.bukvarix}
                 onChange={(checked) => handleServiceChange("bukvarix", checked)}
               />
@@ -1399,7 +1399,7 @@ const Semantix: React.FC = () => {
               ]}
             />
             <Select
-              label="Метод группир��вки"
+              label="Метод группировки"
               value={groupingMethod}
               onChange={setGroupingMethod}
               options={[
@@ -1540,7 +1540,7 @@ const Semantix: React.FC = () => {
             />
             <Textarea
               label="Исключение городов"
-              placeholder="Введите города для исключения через запятую или с новой строки. Эти города не будут исключаться при выборе параметра чистки «Города РФ». Например, если вы хотите, чтобы были исключены все города, кроме Санкт-Петербурга, то в этом поле укажите Санкт-Петербург, а также все подходящие формы его названия, например: «Санкт-Петербург, СПб»."
+              placeholder="Введит�� города для исключения через запятую или с новой строки. Эти города не будут исключаться при выборе параметра чистки «Города РФ». Например, если вы хотите, чтобы были исключены все города, кроме Санкт-Петербурга, то в этом поле укажите Санкт-Петербург, а также все подходящие формы его названия, например: «Санкт-Петербург, СПб»."
               value={cityExclusions}
               onChange={setCityExclusions}
               rows={4}
@@ -1591,7 +1591,7 @@ const Semantix: React.FC = () => {
                 }
               />
               <Checkbox
-                label="Однословники (удаляет фразы из 1 слова)"
+                label="Однословники (удаляет фра��ы из 1 слова)"
                 checked={cleaningParams.singleWords}
                 onChange={(checked) =>
                   handleCleaningParamChange("singleWords", checked)
@@ -1633,36 +1633,42 @@ const Semantix: React.FC = () => {
         <div className="bg-white rounded-lg p-4 sm:p-6">
           <div className="grid grid-cols-1 min-[943px]:grid-cols-2 min-[1216px]:grid-cols-3 min-[1473px]:grid-cols-4 gap-3">
             <div className="min-[943px]:col-span-2 min-[1216px]:col-span-1 grid grid-cols-2 gap-3">
-              <ActionButton
-                icon={
-                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                    <path
-                      fillRule="evenodd"
-                      d="M9 3.5a5.5 5.5 0 100 11 5.5 5.5 0 000-11zM2 9a7 7 0 1112.452 4.391l3.328 3.329a.75.75 0 11-1.06 1.06l-3.329-3.328A7 7 0 012 9z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
-                }
-                color="red"
-                onClick={handleParsing}
-                disabled={loadingStates.parsing}
-                className="h-12"
-              >
-                {loadingStates.parsing ? "Парсинг..." : "Парсинг"}
-              </ActionButton>
-              <ActionButton
-                icon={
-                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M10 2L3 7v11a1 1 0 001 1h3v-6h6v6h3a1 1 0 001-1V7l-7-5z" />
-                  </svg>
-                }
-                color="purple"
-                onClick={handleCleaning}
-                disabled={loadingStates.cleaning}
-                className="h-12"
-              >
-                {loadingStates.cleaning ? "Чистка..." : "Чистка"}
-              </ActionButton>
+              <div className="flex flex-col">
+                <ActionButton
+                  icon={
+                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                      <path
+                        fillRule="evenodd"
+                        d="M9 3.5a5.5 5.5 0 100 11 5.5 5.5 0 000-11zM2 9a7 7 0 1112.452 4.391l3.328 3.329a.75.75 0 11-1.06 1.06l-3.329-3.328A7 7 0 012 9z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
+                  }
+                  color="red"
+                  onClick={handleParsing}
+                  disabled={loadingStates.parsing}
+                  className="h-12"
+                >
+                  {loadingStates.parsing ? "Парсинг..." : "Парсинг"}
+                </ActionButton>
+                <span className={cn(typography.helperText, "mt-1")}>0 л.</span>
+              </div>
+              <div className="flex flex-col">
+                <ActionButton
+                  icon={
+                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                      <path d="M10 2L3 7v11a1 1 0 001 1h3v-6h6v6h3a1 1 0 001-1V7l-7-5z" />
+                    </svg>
+                  }
+                  color="purple"
+                  onClick={handleCleaning}
+                  disabled={loadingStates.cleaning}
+                  className="h-12"
+                >
+                  {loadingStates.cleaning ? "Чистка..." : "Чистка"}
+                </ActionButton>
+                <span className={cn(typography.helperText, "mt-1")}>0 л.</span>
+              </div>
             </div>
             <ActionButton
               icon={
@@ -1796,7 +1802,7 @@ const Semantix: React.FC = () => {
               disabled={loadingStates.downloadShort}
               className="h-12"
             >
-              {loadingStates.downloadShort ? "Скачивание..." : "Выгрузить сокращенную таблицу"}
+              {loadingStates.downloadShort ? "Скачивание..." : "Выгрузить с��кращенную таблицу"}
             </ActionButton>
 
             <ActionButton
@@ -1949,7 +1955,7 @@ const Semantix: React.FC = () => {
                   </svg>
                 }
               >
-                {showBasket ? "Скрыть корзину" : "��оказать корзину"}
+                {showBasket ? "Скрыть корзину" : "Показать корзину"}
               </Button>
 
               <Button
