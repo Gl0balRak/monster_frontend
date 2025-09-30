@@ -616,7 +616,7 @@ const Semantix: React.FC = () => {
     setGroupSelectionDialog({
       open: true,
       title: "Выберите группу",
-      description: "�� какой группе применить загрузку спроса и кликов?",
+      description: "К какой группе применить загрузку спроса и кликов?",
       onConfirm: (selectedGroup) => {
         const groupKeywords =
           selectedGroup === "Не корзина"
@@ -878,14 +878,14 @@ const Semantix: React.FC = () => {
       label: "W",
       sortable: true,
       sortType: "number",
-      tooltip: "Количество запросов в месяц (ча��тотность) в Яндекс.Вордстат",
+      tooltip: "Количество запросов в месяц (частотность) в Яндекс.Вордстат",
     },
     {
       key: "wQuotes",
       label: '"W"',
       sortable: true,
       sortType: "number",
-      tooltip: "Точная частотность запроса в кавычках в Ян��екс.Вордстат",
+      tooltip: "Точная частотность запроса в кавычках в Яндекс.Вордстат",
     },
     {
       key: "wNot",
@@ -1208,7 +1208,7 @@ const Semantix: React.FC = () => {
         {/* 1. Блок «Настройки парсинга» */}
         <div className="bg-white rounded-lg p-6">
           <h2 className={cn(typography.blockTitle, "mb-6")}>
-            Настройки парсинга
+            Настройк�� парсинга
           </h2>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
@@ -1474,7 +1474,7 @@ const Semantix: React.FC = () => {
               ]}
             />
             <Select
-              label="Глубина парсинга"
+              label="Глубина па��синга"
               value={parsingDepth}
               onChange={setParsingDepth}
               options={[
@@ -1517,7 +1517,7 @@ const Semantix: React.FC = () => {
               onChange={setParseNotW}
             />
             <Checkbox
-              label='Парсить "W" (точное вхож��ение)'
+              label='Парсить "W" (точное вхождение)'
               checked={parseWQuoted}
               onChange={setParseWQuoted}
             />
@@ -1540,7 +1540,7 @@ const Semantix: React.FC = () => {
             />
             <Textarea
               label="Исключение городов"
-              placeholder="Введите города для исключения через запятую или с новой строки. Эти города не будут исключаться при выборе параметра чистки «Города РФ». Например, если вы хотите, чтобы были исключены все города, кроме Санкт-Петербурга, то в этом поле укажите Санкт-Петербург, а также все подходящие формы его названия, например: «Санкт-Петербург, СПб»."
+              placeholder="Введите города для исключения через запятую или с новой строки. Эти города не будут исключаться при выборе параметра чистки «Г��рода РФ». Например, если вы хотите, чтобы были исключены все города, кроме Санкт-Петербурга, то в этом поле укажите Санкт-Петербург, а также все подходящие формы его названия, например: «Санкт-Петербург, СПб»."
               value={cityExclusions}
               onChange={setCityExclusions}
               rows={4}
@@ -1629,7 +1629,7 @@ const Semantix: React.FC = () => {
           </div>
         </div>
 
-        {/* 7. Панель действий */}
+        {/* 7. П��нель действий */}
         <div className="bg-white rounded-lg p-4 sm:p-6">
           <div className="grid grid-cols-1 min-[943px]:grid-cols-2 min-[1216px]:grid-cols-3 min-[1473px]:grid-cols-4 gap-3">
             <div className="min-[943px]:col-span-2 min-[1216px]:col-span-1 grid grid-cols-2 gap-3">
@@ -1705,19 +1705,22 @@ const Semantix: React.FC = () => {
               <span className={cn(typography.helperText, "mt-1")}>{operationCosts[2] != null ? `${operationCosts[2]} л.` : "0 л."}</span>
             </div>
 
-            <ActionButton
-              icon={
-                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                  <path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zM8 7a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zM14 4a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z" />
-                </svg>
-              }
-              color="cyan"
-              onClick={handleDemandClicks}
-              disabled={loadingStates.demandClicks}
-              className="h-12"
-            >
-              {loadingStates.demandClicks ? "Загрузка..." : "Загрузка спроса и кликов"}
-            </ActionButton>
+            <div className="flex flex-col">
+              <ActionButton
+                icon={
+                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zM8 7a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zM14 4a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z" />
+                  </svg>
+                }
+                color="cyan"
+                onClick={handleDemandClicks}
+                disabled={loadingStates.demandClicks}
+                className="h-12"
+              >
+                {loadingStates.demandClicks ? "Загрузка..." : "Загрузка спроса и кликов"}
+              </ActionButton>
+              <span className={cn(typography.helperText, "mt-1")}>{operationCosts[3] != null ? `${operationCosts[3]} л.` : "0 л."}</span>
+            </div>
 
             <ActionButton
               icon={
@@ -1754,7 +1757,7 @@ const Semantix: React.FC = () => {
               disabled={loadingStates.commercialization}
               className="h-12"
             >
-              {loadingStates.commercialization ? "Проверка..." : "Проверка коммерциализаци��"}
+              {loadingStates.commercialization ? "Проверка..." : "Проверка коммерциализации"}
             </ActionButton>
 
             <ActionButton
@@ -2149,7 +2152,7 @@ const Semantix: React.FC = () => {
                 />
                 <div className="space-y-2">
                   <label className={cn(typography.fieldLabel)}>
-                    Коммерц��я (%)
+                    Коммерция (%)
                   </label>
                   <div className="flex gap-2">
                     <Input
