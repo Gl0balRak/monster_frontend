@@ -461,6 +461,39 @@ const Semantix: React.FC = () => {
     return Array.from(groups);
   }, [keywords]);
 
+  // Количество запросов без корзины
+  const totalNonBasket = useMemo(() => {
+    return keywords.filter((k) => k.group !== "Корзина").length;
+  }, [keywords]);
+
+  // Стоимости операций
+  const [operationCosts, setOperationCosts] = useState<Record<number, number | null>>({});
+
+  useEffect(() => {
+    const operationIds = [2, 3, 4, 5, 6, 7];
+    let cancelled = false;
+    Promise.all(
+      operationIds.map(async (id) => {
+        try {
+          const res = await semantixApi.getOperationCost({ amount: totalNonBasket, operation_type: id });
+          return [id, res.cost as number] as const;
+        } catch {
+          return [id, null] as const;
+        }
+      })
+    ).then((pairs) => {
+      if (cancelled) return;
+      const map: Record<number, number | null> = {};
+      pairs.forEach(([id, cost]) => {
+        map[id] = cost;
+      });
+      setOperationCosts(map);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [totalNonBasket]);
+
   // Обработчики действий
   const handleParsing = () => {
     if (!websiteUrl || !region) {
@@ -1262,7 +1295,7 @@ const Semantix: React.FC = () => {
                 onChange={(checked) => handleServiceChange("keyso", checked)}
               />
               <Checkbox
-                label="Букварикс"
+                label="Буквар��кс"
                 checked={selectedServices.bukvarix}
                 onChange={(checked) => handleServiceChange("bukvarix", checked)}
               />
@@ -1366,7 +1399,7 @@ const Semantix: React.FC = () => {
               ]}
             />
             <Select
-              label="Метод группировки"
+              label="Метод группир��вки"
               value={groupingMethod}
               onChange={setGroupingMethod}
               options={[
@@ -1916,7 +1949,7 @@ const Semantix: React.FC = () => {
                   </svg>
                 }
               >
-                {showBasket ? "Скрыть корзину" : "Показать корзину"}
+                {showBasket ? "Скрыть корзину" : "��оказать корзину"}
               </Button>
 
               <Button
