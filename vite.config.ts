@@ -7,9 +7,14 @@ export default defineConfig({
   server: {
     host: "::",
     port: 3000,
-    allowedHosts: ["tools.mihaylov.digital"], // Добавьте эту строку
+    allowedHosts: ["tools.mihaylov.digital"],
     fs: {
-      allow: ["./client"],
+      // Allow serving files from the project root and client directory
+      allow: [
+        path.resolve(__dirname),
+        path.resolve(__dirname, "client"),
+        path.resolve(__dirname, "node_modules/vite/dist/client"),
+      ],
     },
   },
   build: {
