@@ -7,7 +7,7 @@ export default defineConfig({
   server: {
     host: "::",
     port: 3000,
-    allowedHosts: ["tools.mihaylov.digital"],
+    allowedHosts: 'all',
     fs: {
       // Allow serving files from the project root and client directory
       allow: [
