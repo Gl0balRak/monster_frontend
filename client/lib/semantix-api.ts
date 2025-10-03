@@ -346,7 +346,10 @@ export const semantixApi = {
   },
 
   // Стоимость операции
-  async getOperationCost(params: { amount: number; operation_type: number }): Promise<OperationCostResponse> {
+  async getOperationCost(params: {
+    amount: number;
+    operation_type: number;
+  }): Promise<OperationCostResponse> {
     const query = new URLSearchParams({
       amount: String(params.amount ?? 0),
       operation_type: String(params.operation_type ?? 1),
@@ -361,7 +364,9 @@ export const semantixApi = {
     });
     if (!response.ok) {
       const errorText = await response.text();
-      throw new Error(`API Error: ${response.status} ${response.statusText} - ${errorText}`);
+      throw new Error(
+        `API Error: ${response.status} ${response.statusText} - ${errorText}`,
+      );
     }
     return response.json();
   },
