@@ -1,3 +1,5 @@
+import { API_ENDPOINTS } from "@/config/api.config.js";
+
 // API для работы с Семантиксом
 const API_BASE_URL = "http://localhost:3002";
 
@@ -40,6 +42,10 @@ export interface TaskStatus {
 export interface Region {
   value: string;
   label: string;
+}
+
+export interface OperationCostResponse {
+  cost: number;
 }
 
 // Мок-функция для получения токена
@@ -337,6 +343,32 @@ export const semantixApi = {
     default_region: string;
   }> {
     return apiCall("/semantix/service/regions");
+  },
+
+  // Стоимость операции
+  async getOperationCost(params: {
+    amount: number;
+    operation_type: number;
+  }): Promise<OperationCostResponse> {
+    const query = new URLSearchParams({
+      amount: String(params.amount ?? 0),
+      operation_type: String(params.operation_type ?? 1),
+    }).toString();
+    const url = `${API_ENDPOINTS.limits.operation_cost}?${query}`;
+    const response = await fetch(url, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: getAuthToken(),
+      },
+    });
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(
+        `API Error: ${response.status} ${response.statusText} - ${errorText}`,
+      );
+    }
+    return response.json();
   },
 
   // Очистка всех данных
