@@ -1,3 +1,5 @@
+import { API_ENDPOINTS } from "@/config/api.config.js";
+
 // API для работы с Семантиксом
 const API_BASE_URL = "http://localhost:3002";
 
@@ -349,7 +351,19 @@ export const semantixApi = {
       amount: String(params.amount ?? 0),
       operation_type: String(params.operation_type ?? 1),
     }).toString();
-    return apiCall<OperationCostResponse>(`/operation_cost?${query}`);
+    const url = `${API_ENDPOINTS.limits.operation_cost}?${query}`;
+    const response = await fetch(url, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: getAuthToken(),
+      },
+    });
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`API Error: ${response.status} ${response.statusText} - ${errorText}`);
+    }
+    return response.json();
   },
 
   // Очистка всех данных
