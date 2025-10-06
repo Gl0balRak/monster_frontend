@@ -136,6 +136,7 @@ const Semantix: React.FC = () => {
     description: string;
     onConfirm: () => void;
     variant?: "default" | "destructive";
+    confirmText?: string;
   }>({
     open: false,
     title: "",
@@ -544,16 +545,23 @@ const Semantix: React.FC = () => {
       open: true,
       title: "Выберите группу",
       description: "К какой группе применить парсинг поисковых подсказок?",
-      onConfirm: (selectedGroup) => {
+      onConfirm: async (selectedGroup) => {
         const groupKeywords =
           selectedGroup === "Не корзина"
             ? keywords.filter((k) => k.group !== "Корзина").length
             : keywords.filter((k) => k.group === selectedGroup).length;
 
+        let confirmText: string | undefined = undefined;
+        try {
+          const res = await semantixApi.getOperationCost({ amount: groupKeywords, operation_type: 4 });
+          if (res.cost != null) confirmText = `${res.cost} л.`;
+        } catch {}
+
         setConfirmDialog({
           open: true,
           title: "Подтвердите операцию",
           description: `Парсинг поисковых подсказок будет применен к группе "${selectedGroup}" (${groupKeywords} ключевых слов). Продолжить?`,
+          confirmText,
           onConfirm: async () => {
             await parseSearchSuggestions({
               region,
@@ -586,16 +594,23 @@ const Semantix: React.FC = () => {
       open: true,
       title: "Выберите группу",
       description: "К какой группе применить парсинг частот?",
-      onConfirm: (selectedGroup) => {
+      onConfirm: async (selectedGroup) => {
         const groupKeywords =
           selectedGroup === "Не корзина"
             ? keywords.filter((k) => k.group !== "Корзина").length
             : keywords.filter((k) => k.group === selectedGroup).length;
 
+        let confirmText: string | undefined = undefined;
+        try {
+          const res = await semantixApi.getOperationCost({ amount: groupKeywords, operation_type: 2 });
+          if (res.cost != null) confirmText = `${res.cost} л.`;
+        } catch {}
+
         setConfirmDialog({
           open: true,
           title: "Подтвердите операцию",
           description: `Парсинг частот будет применен к группе "${selectedGroup}" (${groupKeywords} ключевых слов). Продолжить?`,
+          confirmText,
           onConfirm: async () => {
             await parseFrequencies({
               region,
@@ -617,16 +632,23 @@ const Semantix: React.FC = () => {
       open: true,
       title: "Выберите группу",
       description: "К какой группе применить загрузку спроса и кликов?",
-      onConfirm: (selectedGroup) => {
+      onConfirm: async (selectedGroup) => {
         const groupKeywords =
           selectedGroup === "Не корзина"
             ? keywords.filter((k) => k.group !== "Корзина").length
             : keywords.filter((k) => k.group === selectedGroup).length;
 
+        let confirmText: string | undefined = undefined;
+        try {
+          const res = await semantixApi.getOperationCost({ amount: groupKeywords, operation_type: 3 });
+          if (res.cost != null) confirmText = `${res.cost} л.`;
+        } catch {}
+
         setConfirmDialog({
           open: true,
           title: "Подтвердите операцию",
           description: `Загрузка спроса и кликов будет применена к группе "${selectedGroup}" (${groupKeywords} ключевых слов). Продолжить?`,
+          confirmText,
           onConfirm: async () => {
             await loadDemandAndClicks({
               region,
@@ -645,16 +667,23 @@ const Semantix: React.FC = () => {
       open: true,
       title: "Выберите группу",
       description: "К какой группе применить проверку конкурентности?",
-      onConfirm: (selectedGroup) => {
+      onConfirm: async (selectedGroup) => {
         const groupKeywords =
           selectedGroup === "Не корзина"
             ? keywords.filter((k) => k.group !== "Корзина").length
             : keywords.filter((k) => k.group === selectedGroup).length;
 
+        let confirmText: string | undefined = undefined;
+        try {
+          const res = await semantixApi.getOperationCost({ amount: groupKeywords, operation_type: 5 });
+          if (res.cost != null) confirmText = `${res.cost} л.`;
+        } catch {}
+
         setConfirmDialog({
           open: true,
           title: "Подтвердите операцию",
           description: `Проверка конкурентности будет применена к группе "${selectedGroup}" (${groupKeywords} ключевых слов). Продолжить?`,
+          confirmText,
           onConfirm: async () => {
             await checkCompetition({
               region,
@@ -673,16 +702,23 @@ const Semantix: React.FC = () => {
       open: true,
       title: "Выберите группу",
       description: "К какой группе применить проверку коммерциализации?",
-      onConfirm: (selectedGroup) => {
+      onConfirm: async (selectedGroup) => {
         const groupKeywords =
           selectedGroup === "Не корзина"
             ? keywords.filter((k) => k.group !== "Корзина").length
             : keywords.filter((k) => k.group === selectedGroup).length;
 
+        let confirmText: string | undefined = undefined;
+        try {
+          const res = await semantixApi.getOperationCost({ amount: groupKeywords, operation_type: 6 });
+          if (res.cost != null) confirmText = `${res.cost} л.`;
+        } catch {}
+
         setConfirmDialog({
           open: true,
           title: "Подтвердите операцию",
           description: `Проверка коммерциализации будет применена к группе "${selectedGroup}" (${groupKeywords} ключевых слов). Продолжить?`,
+          confirmText,
           onConfirm: async () => {
             await checkCommercialization({
               region,
@@ -695,11 +731,19 @@ const Semantix: React.FC = () => {
     });
   };
 
-  const handleClustering = () => {
+  const handleClustering = async () => {
+    const amount = keywords.filter((k) => k.group !== "Корзина").length;
+    let confirmText: string | undefined = undefined;
+    try {
+      const res = await semantixApi.getOperationCost({ amount, operation_type: 7 });
+      if (res.cost != null) confirmText = `${res.cost} л.`;
+    } catch {}
+
     setConfirmDialog({
       open: true,
       title: "Подтвердите кластеризацию",
-      description: `К кластеризации будет отправлено ${keywords.filter((k) => k.group !== "Корзина").length} ключевых слов. Продолжить?`,
+      description: `К кластеризации будет отправлено ${amount} ключевых слов. Продолжить?`,
+      confirmText,
       onConfirm: async () => {
         await clusterKeywords({
           region,
@@ -1159,6 +1203,7 @@ const Semantix: React.FC = () => {
           }
           title={confirmDialog.title}
           description={confirmDialog.description}
+          confirmText={confirmDialog.confirmText}
           onConfirm={confirmDialog.onConfirm}
           variant={confirmDialog.variant}
         />
@@ -1533,7 +1578,7 @@ const Semantix: React.FC = () => {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
             <Textarea
               label="Стоп-слова"
-              placeholder="Введите стоп-слова через запятую или с новой строки"
+              placeholder="Введите стоп-слова через запятую или с н��вой строки"
               value={stopWords}
               onChange={setStopWords}
               rows={4}
@@ -1651,7 +1696,6 @@ const Semantix: React.FC = () => {
                 >
                   {loadingStates.parsing ? "Парсинг..." : "Парсинг"}
                 </ActionButton>
-                <span className={cn(typography.helperText, "mt-1")}>0 л.</span>
               </div>
               <div className="flex flex-col">
                 <ActionButton
@@ -1667,7 +1711,6 @@ const Semantix: React.FC = () => {
                 >
                   {loadingStates.cleaning ? "Чистка..." : "Чистка"}
                 </ActionButton>
-                <span className={cn(typography.helperText, "mt-1")}>0 л.</span>
               </div>
             </div>
             <div className="flex flex-col">
@@ -1684,7 +1727,6 @@ const Semantix: React.FC = () => {
               >
                 {loadingStates.searchSuggestions ? "Выгрузка..." : "Выгрузить поисковые подсказки"}
               </ActionButton>
-              <span className={cn(typography.helperText, "mt-1")}>{operationCosts[4] != null ? `${operationCosts[4]} л.` : "0 л."}</span>
             </div>
 
             <div className="flex flex-col">
@@ -1702,7 +1744,6 @@ const Semantix: React.FC = () => {
               >
                 {loadingStates.frequencies ? "Парсинг..." : "Парсинг частот"}
               </ActionButton>
-              <span className={cn(typography.helperText, "mt-1")}>{operationCosts[2] != null ? `${operationCosts[2]} л.` : "0 л."}</span>
             </div>
 
             <div className="flex flex-col">
@@ -1719,7 +1760,6 @@ const Semantix: React.FC = () => {
               >
                 {loadingStates.demandClicks ? "Загрузка..." : "Загрузка спроса и кликов"}
               </ActionButton>
-              <span className={cn(typography.helperText, "mt-1")}>{operationCosts[3] != null ? `${operationCosts[3]} л.` : "0 л."}</span>
             </div>
 
             <div className="flex flex-col">
@@ -1741,7 +1781,6 @@ const Semantix: React.FC = () => {
               >
                 {loadingStates.competition ? "Проверка..." : "Проверка конкурентности"}
               </ActionButton>
-              <span className={cn(typography.helperText, "mt-1")}>{operationCosts[5] != null ? `${operationCosts[5]} л.` : "0 л."}</span>
             </div>
 
             <div className="flex flex-col">
@@ -1763,7 +1802,6 @@ const Semantix: React.FC = () => {
               >
                 {loadingStates.commercialization ? "Проверка..." : "Проверка коммерциализации"}
               </ActionButton>
-              <span className={cn(typography.helperText, "mt-1")}>{operationCosts[6] != null ? `${operationCosts[6]} л.` : "0 л."}</span>
             </div>
 
             <div className="flex flex-col">
@@ -1784,7 +1822,6 @@ const Semantix: React.FC = () => {
               >
                 {loadingStates.clustering ? "Кластеризация..." : "Кластеризация"}
               </ActionButton>
-              <span className={cn(typography.helperText, "mt-1")}>{operationCosts[7] != null ? `${operationCosts[7]} л.` : "0 л."}</span>
             </div>
 
             <ActionButton
@@ -1956,7 +1993,7 @@ const Semantix: React.FC = () => {
               </Button>
             </div>
 
-            {/* Второй ряд: действия с выбранными */}
+            {/* Второй ряд: действия с выбранн��ми */}
             <div className="flex flex-wrap gap-3">
               <Button
                 variant="outline"
