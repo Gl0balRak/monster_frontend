@@ -9,7 +9,7 @@ export default defineConfig({
     port: 3000,
     allowedHosts: ["tools.mihaylov.digital"], // Добавьте эту строку
     fs: {
-      allow: ["./client"],
+      allow: ["./client", "."],
     },
   },
   build: {
