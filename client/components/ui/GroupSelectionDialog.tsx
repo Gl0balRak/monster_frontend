@@ -69,7 +69,13 @@ export const GroupSelectionDialog: React.FC<GroupSelectionDialogProps> = ({
     onOpenChange(false);
   };
 
-  const confirmLabel = getCost ? (loading ? loadingText : (cost != null ? `${cost}${costUnit}` : "Продолжить")) : "Продолжить";
+  const confirmLabel = getCost
+    ? loading
+      ? loadingText
+      : cost != null
+        ? `${cost}${costUnit}`
+        : "Продолжить"
+    : "Продолжить";
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
