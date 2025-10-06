@@ -50,6 +50,7 @@ export const API_ENDPOINTS = {
     balance: `${PAYMENT_API_URL}/payment/balance`,
     transactionHistory: `${PAYMENT_API_URL}/payment/operations-log`,
     cost: `${PAYMENT_API_URL}/tariffs/limits_cost`,
+    operation_cost: `${PAYMENT_API_URL}/tariffs/operation_cost`
   },
 };
 
