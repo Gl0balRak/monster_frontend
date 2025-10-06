@@ -18,6 +18,9 @@ interface GroupSelectionDialogProps {
   groups: string[];
   onConfirm: (selectedGroup: string) => void;
   defaultGroup?: string;
+  getCost?: (group: string) => Promise<number | null>;
+  costUnit?: string;
+  loadingText?: string;
 }
 
 export const GroupSelectionDialog: React.FC<GroupSelectionDialogProps> = ({
@@ -28,8 +31,33 @@ export const GroupSelectionDialog: React.FC<GroupSelectionDialogProps> = ({
   groups,
   onConfirm,
   defaultGroup = "Не корзина",
+  getCost,
+  costUnit = " л.",
+  loadingText = "...",
 }) => {
   const [selectedGroup, setSelectedGroup] = useState(defaultGroup);
+  const [cost, setCost] = useState<number | null>(null);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    const fetchCost = async () => {
+      if (!getCost || !open) return;
+      setLoading(true);
+      try {
+        const c = await getCost(selectedGroup);
+        if (!cancelled) setCost(c);
+      } catch {
+        if (!cancelled) setCost(null);
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    };
+    fetchCost();
+    return () => {
+      cancelled = true;
+    };
+  }, [selectedGroup, getCost, open]);
 
   const handleConfirm = () => {
     onConfirm(selectedGroup);
@@ -40,6 +68,8 @@ export const GroupSelectionDialog: React.FC<GroupSelectionDialogProps> = ({
     setSelectedGroup(defaultGroup);
     onOpenChange(false);
   };
+
+  const confirmLabel = getCost ? (loading ? loadingText : (cost != null ? `${cost}${costUnit}` : "Продолжить")) : "Продолжить";
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -67,7 +97,7 @@ export const GroupSelectionDialog: React.FC<GroupSelectionDialogProps> = ({
             onClick={handleConfirm}
             className="bg-red-600 hover:bg-red-700"
           >
-            Продолжить
+            {confirmLabel}
           </Button>
         </DialogFooter>
       </DialogContent>
