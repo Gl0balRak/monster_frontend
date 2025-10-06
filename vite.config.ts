@@ -7,9 +7,8 @@ export default defineConfig({
   server: {
     host: "::",
     port: 3000,
-    allowedHosts: ["tools.mihaylov.digital"], // Добавьте эту строку
     fs: {
-      allow: ["./client"],
+      allow: ["./client", "."],
     },
   },
   build: {
@@ -23,16 +22,16 @@ export default defineConfig({
   },
   test: {
     globals: true,
-    environment: 'happy-dom',
-    setupFiles: './client/setupTests.ts',
+    environment: "happy-dom",
+    setupFiles: "./client/setupTests.ts",
     coverage: {
-      provider: 'v8',
-      reporter: ['text', 'json', 'html'],
+      provider: "v8",
+      reporter: ["text", "json", "html"],
       exclude: [
-        '**/*.config.*',
-        '**/dist/**',
-        '**/node_modules/**',
-        '**/client/test-utils/**'
+        "**/*.config.*",
+        "**/dist/**",
+        "**/node_modules/**",
+        "**/client/test-utils/**",
       ],
     },
   },
