@@ -8,23 +8,6 @@ interface SidebarProps {
   onPageChange: (page: string) => void;
 }
 
-const CloseIcon = () => (
-  <svg
-    width="24"
-    height="24"
-    viewBox="0 0 24 24"
-    fill="none"
-    xmlns="http://www.w3.org/2000/svg"
-  >
-    <path
-      fillRule="evenodd"
-      clipRule="evenodd"
-      d="M5.29289 5.29289C5.68342 4.90237 6.31658 4.90237 6.70711 5.29289L12 10.5858L17.2929 5.29289C17.6834 4.90237 18.3166 4.90237 18.7071 5.29289C19.0976 5.68342 19.0976 6.31658 18.7071 6.70711L13.4142 12L18.7071 17.2929C19.0976 17.6834 19.0976 18.3166 18.7071 18.7071C18.3166 19.0976 17.6834 19.0976 17.2929 18.7071L12 13.4142L6.70711 18.7071C6.31658 19.0976 5.68342 19.0976 5.29289 18.7071C4.90237 18.3166 4.90237 17.6834 5.29289 17.2929L10.5858 12L5.29289 6.70711C4.90237 6.31658 4.90237 5.68342 5.29289 5.29289Z"
-      fill="#868E96"
-    />
-  </svg>
-);
-
 const ServerIcon = () => (
   <svg
     width="24"
@@ -71,23 +54,6 @@ const TextIcon = () => (
       fillRule="evenodd"
       clipRule="evenodd"
       d="M9.88639 4.54073C10.0084 4.21548 10.3193 4 10.6667 4H12.3333C12.6644 4 12.9641 4.19599 13.0968 4.49932L18.7117 17.3333H19C19.4602 17.3333 19.8333 17.7064 19.8333 18.1667C19.8333 18.6269 19.4602 19 19 19H18.1858C18.1733 19.0003 18.1608 19.0003 18.1484 19H14.8543C14.8405 19.0003 14.8268 19.0003 14.813 19H13.1667C12.7064 19 12.3333 18.6269 12.3333 18.1667C12.3333 17.7064 12.7064 17.3333 13.1667 17.3333H13.5755L12.5171 14.8333H7.80667L6.86917 17.3333H7.33333C7.79357 17.3333 8.16667 17.7064 8.16667 18.1667C8.16667 18.6269 7.79357 19 7.33333 19H5.68587C5.67301 19.0003 5.66013 19.0003 5.64722 19H4.83333C4.3731 19 4 18.6269 4 18.1667C4 17.7064 4.3731 17.3333 4.83333 17.3333H5.08917L9.88639 4.54073ZM8.43167 13.1667H11.8115L10.0192 8.93312L8.43167 13.1667ZM10.8694 6.66613L15.3854 17.3333H16.8925L11.7883 5.66667H11.2442L10.8694 6.66613Z"
-      fill="currentColor"
-    />
-  </svg>
-);
-
-const CheckIcon = () => (
-  <svg
-    width="24"
-    height="24"
-    viewBox="0 0 24 24"
-    fill="none"
-    xmlns="http://www.w3.org/2000/svg"
-  >
-    <path
-      fillRule="evenodd"
-      clipRule="evenodd"
-      d="M20.7071 6.29289C21.0976 6.68342 21.0976 7.31658 20.7071 7.70711L10.7071 17.7071C10.3166 18.0976 9.68342 18.0976 9.29289 17.7071L4.29289 12.7071C3.90237 12.3166 3.90237 11.6834 4.29289 11.2929C4.68342 10.9024 5.31658 10.9024 5.70711 11.2929L10 15.5858L19.2929 6.29289C19.6834 5.90237 20.3166 5.90237 20.7071 6.29289Z"
       fill="currentColor"
     />
   </svg>
@@ -173,23 +139,6 @@ const ChevronUpIcon = () => (
       fillRule="evenodd"
       clipRule="evenodd"
       d="M11.2929 8.29289C11.6834 7.90237 12.3166 7.90237 12.7071 8.29289L18.7071 14.2929C19.0976 14.6834 19.0976 15.3166 18.7071 15.7071C18.3166 16.0976 17.6834 16.0976 17.2929 15.7071L12 10.4142L6.70711 15.7071C6.31658 16.0976 5.68342 16.0976 5.29289 15.7071C4.90237 15.3166 4.90237 14.6834 5.29289 14.2929L11.2929 8.29289Z"
-      fill="currentColor"
-    />
-  </svg>
-);
-
-const ChevronDownIcon = () => (
-  <svg
-    width="24"
-    height="24"
-    viewBox="0 0 24 24"
-    fill="none"
-    xmlns="http://www.w3.org/2000/svg"
-  >
-    <path
-      fillRule="evenodd"
-      clipRule="evenodd"
-      d="M5.29289 8.29289C5.68342 7.90237 6.31658 7.90237 6.70711 8.29289L12 13.5858L17.2929 8.29289C17.6834 7.90237 18.3166 7.90237 18.7071 8.29289C19.0976 8.68342 19.0976 9.31658 18.7071 9.70711L12.7071 15.7071C12.3166 16.0976 11.6834 16.0976 11.2929 15.7071L5.29289 9.70711C4.90237 9.31658 4.90237 8.68342 5.29289 8.29289Z"
       fill="currentColor"
     />
   </svg>
@@ -309,6 +258,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
     const saved = localStorage.getItem('sidebar-pinned');
     return saved ? JSON.parse(saved) : false;
   });
+  const hoverTimeoutRef = React.useRef<NodeJS.Timeout | null>(null);
 
   const toggleExpanded = (itemId: string) => {
     setExpandedItems((prev) =>
@@ -320,12 +270,18 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
   const handleMouseEnter = () => {
     if (!isPinned) {
-      setIsHovered(true);
+      hoverTimeoutRef.current = setTimeout(() => {
+        setIsHovered(true);
+      }, 600);
     }
   };
 
   const handleMouseLeave = () => {
     if (!isPinned) {
+      if (hoverTimeoutRef.current) {
+        clearTimeout(hoverTimeoutRef.current);
+        hoverTimeoutRef.current = null;
+      }
       setExpandedItems([]);
       setTimeout(() => {
         setIsHovered(false);
@@ -343,6 +299,14 @@ export const Sidebar: React.FC<SidebarProps> = ({
       setIsHovered(true);
     }
   };
+
+  React.useEffect(() => {
+    return () => {
+      if (hoverTimeoutRef.current) {
+        clearTimeout(hoverTimeoutRef.current);
+      }
+    };
+  }, []);
 
   const PinIcon = () => (
   <svg
@@ -374,10 +338,22 @@ export const Sidebar: React.FC<SidebarProps> = ({
       onMouseLeave={handleMouseLeave}
       style={{
         transformOrigin: 'left center',
+        boxSizing: 'border-box',
+        margin: 0,
       }}
     >
-      {/* Navigation menu */}
-      <div className="bg-white rounded-lg p-2 flex-1 overflow-hidden relative">
+
+    <div 
+        className="bg-white rounded-lg p-2 flex-1 overflow-hidden relative"
+        style={{
+          margin: 0,
+          padding: '8px',
+          boxSizing: 'border-box',
+          width: '100%',
+          height: '100%',
+          minHeight: '400px',
+        }}
+      >
         <div className={cn(
           "absolute top-2 right-2 transition-opacity duration-200 z-10",
           {
@@ -420,7 +396,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     "text-red-9":
                       (item.subItems && currentPage.startsWith(item.id)) ||
                       (!item.subItems && currentPage === item.id),
-                    "text-black": !(
+                      "text-black": !(
                       (item.subItems && currentPage.startsWith(item.id)) ||
                       (!item.subItems && currentPage === item.id)
                     ),
@@ -441,7 +417,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 >
                   {item.icon}
                 </span>
-                
                 <span className={cn(
                   "flex-1 ml-3 whitespace-nowrap transition-opacity duration-150",
                   {
@@ -467,7 +442,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   </span>
                 )}
               </button>
-
               {item.subItems && (isHovered || isPinned) && (
                 <div
                   className={cn(
@@ -520,9 +494,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
             </div>
           ))}
         </nav>
-        
         {(isHovered || isPinned) && <BackToTopButton />}
       </div>
     </aside>
   );
-};
+  };

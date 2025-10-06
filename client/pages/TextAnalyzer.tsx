@@ -9,10 +9,11 @@ import { ComparisonTable } from "@/components/tables/ComparisonTable";
 import { LSIResults } from "@/components/tables/LSIResults";
 import { KeywordsResults } from "@/components/tables/KeywordsResults";
 import { CollocationAnalysisButton } from '@/components/buttons/CollocationAnalysisButton';
-import { CollocationResults } from '@/components/tables/CollocationResults';
+import { CollocationResultsDisplay } from '@/components/tables/CollocationResultsDisplay.tsx';
 import { useTextAnalyzer } from "@/hooks/useTextAnalyzer";
 import { useCollocationAnalysis } from '@/hooks/useCollocationAnalysis';
 import { HelpTooltip } from "@/components/ui/HelpTooltip";
+import ToolDescription from "@/components/ToolDescription/ToolDescription";
 import { useTranslation } from 'react-i18next';
 
 const TextAnalyzerPage: React.FC = () => {
@@ -40,6 +41,8 @@ const TextAnalyzerPage: React.FC = () => {
     setLsiResults,
     setKeywordsResults,
   } = useTextAnalyzer();
+
+  const [collocationOriginalPhrases, setCollocationOriginalPhrases] = useState<string[]>([]);
 
   // Добавляем хук для анализа коллокаций
   const {
@@ -112,6 +115,10 @@ const TextAnalyzerPage: React.FC = () => {
         setCollocationResults(saved.collocationResults);
       }
 
+      if (saved.collocationOriginalPhrases) {
+        setCollocationOriginalPhrases(saved.collocationOriginalPhrases);
+      }
+
       // --- остальные поля формы ---
       if (saved.pageUrl) setPageUrl(saved.pageUrl);
       if (saved.mainQuery) setMainQuery(saved.mainQuery);
@@ -147,6 +154,7 @@ const TextAnalyzerPage: React.FC = () => {
       additionalResults,
       results,
       selectedCompetitors,
+      collocationOriginalPhrases,
       collocationResults, // добавляем результаты коллокаций
     };
 
@@ -445,6 +453,41 @@ User-Agent строки и IP-адреса предоставляются по �
               Проверка страницы и получение ТОП результатов
             </p>
           </div>
+          <div className="overflow-hidden">
+            <ToolDescription
+              shortDescription="Анализ SEO-оптимизации текста и сравнение с конкурентами из поисковой выдачи"
+              fullDescription={
+                <div className="space-y-3">
+                  <p>
+                    <strong>Текстовый анализатор</strong> — это комплексный инструмент для глубокого анализа 
+                    контента вашей страницы и сравнения его с конкурентами из ТОП поисковой выдачи.
+                  </p>
+                  
+                  <div>
+                    <strong>Что анализирует инструмент:</strong>
+                    <ul className="list-disc list-inside mt-1 space-y-1">
+                      <li>Объем текста и распределение слов по тегам</li>
+                      <li>Плотность ключевых слов и LSI-фраз</li>
+                      <li>Семантическое ядро и коллокации</li>
+                      <li>Уникальность и грамотность текста</li>
+                      <li>SEO-параметры конкурентов</li>
+                    </ul>
+                  </div>
+
+                  <div>
+                    <strong>Зачем использовать:</strong>
+                    <ul className="list-disc list-inside mt-1 space-y-1">
+                      <li>Оптимизировать текст под поисковые системы</li>
+                      <li>Найти дополнительные ключевые фразы</li>
+                      <li>Увидеть сильные и слабые стороны вашего контента</li>
+                      <li>Улучшить позиции в поисковой выдаче</li>
+                      <li>Создать более релевантный и полезный контент</li>
+                    </ul>
+                  </div>
+                </div>
+              }
+            />
+          </div>
 
           {/* Показываем ошибку если есть */}
           {error && (
@@ -505,7 +548,7 @@ User-Agent строки и IP-адреса предоставляются по �
           {/* Additional Queries Section */}
           <AddQuerySection
             label={t('additionalQueries.label')}
-            maxCount={5}
+            maxCount={9}
             onChange={setAdditionalQueries}
             buttonText={t('additionalQueries.addButton')}
             placeholder={t('additionalQueries.placeholder')}
@@ -759,24 +802,26 @@ User-Agent строки и IP-адреса предоставляются по �
                     Поможет найти дополнительные LSI-слова и понять контекст использования.
                   </p>
                 </div>
-                <CollocationAnalysisButton
-                  pageUrl={results?.my_page?.url || pageUrl}
-                  mainQuery={mainQuery}
-                  additionalQueries={additionalQueries}
-                  lsiResults={lsiResults} // Передаем LSI результаты
-                  onStart={() => {
-                    console.log('Начало анализа коллокаций');
-                  }}
-                  onSuccess={(data) => {
-                    console.log('Успешный анализ коллокаций:', data);
-                    setCollocationResults(data);
-                  }}
-                  onError={(error) => {
-                    console.error('Ошибка анализа коллокаций:', error);
-                    alert(`Ошибка анализа: ${error}`);
-                  }}
-                  disabled={collocationLoading || lsiLoading || keywordsLoading}
-                />
+                  <CollocationAnalysisButton
+                    pageUrl={results?.my_page?.url || pageUrl}
+                    competitorUrls={selectedCompetitors}  // Добавляем выбранных конкурентов
+                    mainQuery={mainQuery}
+                    additionalQueries={additionalQueries}
+                    lsiResults={lsiResults}
+                    onStart={() => {
+                      console.log('Начало анализа коллокаций');
+                    }}
+                    onSuccess={(data, originalPhrases) => {  // Обновляем для получения originalPhrases
+                      console.log('Успешный анализ коллокаций:', data);
+                      setCollocationResults(data);
+                      setCollocationOriginalPhrases(originalPhrases);
+                    }}
+                    onError={(error) => {
+                      console.error('Ошибка анализа коллокаций:', error);
+                      alert(`Ошибка анализа: ${error}`);
+                    }}
+                    disabled={collocationLoading || lsiLoading || keywordsLoading}
+                  />
               </div>
             </div>
           )}
@@ -800,14 +845,9 @@ User-Agent строки и IP-адреса предоставляются по �
 
           {/* Результаты анализа коллокаций */}
           {collocationResults && !collocationLoading && (
-            <CollocationResults
+            <CollocationResultsDisplay
               data={collocationResults}
-              loading={collocationLoading}
-              onBack={() => {
-                if (confirm('Вы уверены, что хотите очистить результаты коллокаций?')) {
-                  resetCollocationResults();
-                }
-              }}
+              originalPhrases={collocationOriginalPhrases}
             />
           )}
         </div>

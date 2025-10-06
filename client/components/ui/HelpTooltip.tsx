@@ -9,7 +9,7 @@ export const HelpTooltip: React.FC<HelpTooltipProps> = ({ content, className = '
   const [isVisible, setIsVisible] = useState<boolean>(false);
 
   return (
-    <div className={`relative inline-block ml-2 ${className}`}>
+    <div className={`relative inline-block ml-2 pt-[15px] ${className}`}>
       <button
         type="button"
         onMouseEnter={() => setIsVisible(true)}
