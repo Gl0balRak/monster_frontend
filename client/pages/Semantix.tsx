@@ -395,7 +395,7 @@ const Semantix: React.FC = () => {
     setCleaningParams(updatedParams);
   };
 
-  // Ф��нкции для работы с фильтрами
+  // Ф��нкции для работы с фильтр��ми
   const resetFilters = () => {
     setFilters({
       relevantPage: "",
@@ -1217,6 +1217,32 @@ const Semantix: React.FC = () => {
           description={groupSelectionDialog.description}
           groups={uniqueGroups}
           onConfirm={groupSelectionDialog.onConfirm}
+          getCost={async (group) => {
+            const amount = group === "Не корзина"
+              ? keywords.filter((k) => k.group !== "Корзина").length
+              : keywords.filter((k) => k.group === group).length;
+            try {
+              // Determine operation type from current dialog title
+              // Map by known titles
+              const title = groupSelectionDialog.title || "";
+              const opMap: Record<string, number> = {
+                "Выбе��ите группу": 0,
+              };
+              // Fallback by description keywords
+              let operationType = 0;
+              if (groupSelectionDialog.description.includes("поисковых подсказок")) operationType = 4;
+              else if (groupSelectionDialog.description.includes("частот")) operationType = 2;
+              else if (groupSelectionDialog.description.includes("спроса и кликов")) operationType = 3;
+              else if (groupSelectionDialog.description.includes("конкурентности")) operationType = 5;
+              else if (groupSelectionDialog.description.includes("коммерциализации")) operationType = 6;
+
+              if (!operationType) return null;
+              const res = await semantixApi.getOperationCost({ amount, operation_type: operationType });
+              return res.cost ?? null;
+            } catch {
+              return null;
+            }
+          }}
         />
 
         <NewGroupDialog
@@ -1578,7 +1604,7 @@ const Semantix: React.FC = () => {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
             <Textarea
               label="Стоп-слова"
-              placeholder="Введите стоп-слова через запятую или с н��вой строки"
+              placeholder="Введите стоп-слова через запятую или с новой строки"
               value={stopWords}
               onChange={setStopWords}
               rows={4}
@@ -1643,14 +1669,14 @@ const Semantix: React.FC = () => {
                 }
               />
               <Checkbox
-                label="Города РФ (чистка по городам России)"
+                label="Города РФ (чистка по город��м России)"
                 checked={cleaningParams.citiesRF}
                 onChange={(checked) =>
                   handleCleaningParamChange("citiesRF", checked)
                 }
               />
               <Checkbox
-                label="Латиница (удаляет фразы с латиницей)"
+                label="��атиница (удаляет фразы с латиницей)"
                 checked={cleaningParams.latin}
                 onChange={(checked) =>
                   handleCleaningParamChange("latin", checked)
@@ -1758,7 +1784,7 @@ const Semantix: React.FC = () => {
                 disabled={loadingStates.demandClicks}
                 className="h-12"
               >
-                {loadingStates.demandClicks ? "Загрузка..." : "Загрузка спроса и кликов"}
+                {loadingStates.demandClicks ? "Загрузка..." : "Загрузка спроса и кли��ов"}
               </ActionButton>
             </div>
 
@@ -1993,7 +2019,7 @@ const Semantix: React.FC = () => {
               </Button>
             </div>
 
-            {/* Второй ряд: действия с выбранн��ми */}
+            {/* Второй ряд: действия с выбранными */}
             <div className="flex flex-wrap gap-3">
               <Button
                 variant="outline"
