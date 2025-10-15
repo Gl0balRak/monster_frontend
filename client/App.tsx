@@ -33,6 +33,7 @@ import PlaceholderPage from "./pages/PlaceholderPage";
 import PersonalAccount from "./pages/PersonalAccount";
 import LoginPage from "./pages/LoginPage.tsx";
 import LinkAnalyzer from "@/pages/LinkAnalyzer.tsx";
+import CreateTails from "@/pages/CreateTails.tsx";
 
 const queryClient = new QueryClient();
 
@@ -61,6 +62,7 @@ const MainLayout: React.FC = () => {
 
   // Функция проверки доступности сервиса
   const isServiceAvailable = (serviceName: string) => {
+    console.log(availableServices);
     return availableServices.includes(serviceName);
   };
 
@@ -83,6 +85,15 @@ const MainLayout: React.FC = () => {
             title="Текстовый анализатор"
             description="Сервис временно недоступен"
           />
+        );
+      case "create-tails":
+        return isServiceAvailable("create-tails") ? (
+            <CreateTails />
+        ) : (
+            <PlaceholderPage
+                title="Создание хвостов"
+                description="Сервис временно недоступен"
+            />
         );
       case "query-index":
         return isServiceAvailable("query-index") ? (

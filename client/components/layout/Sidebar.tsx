@@ -249,6 +249,11 @@ const menuItems: MenuItem[] = [
         icon: <TextIcon />,
       },
       {
+        id: "create-tails",
+        label: "Создание хвостов",
+        icon: <TextIcon />,
+      },
+      {
         id: "query-index",
         label: "Прокачка запросного индекса",
         icon: <QueryIndexIcon />,
