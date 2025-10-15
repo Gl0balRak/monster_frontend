@@ -60,18 +60,18 @@ export const AuthHandler: React.FC<AuthHandlerProps> = ({ onAuthComplete }) => {
           try {
             // Получаем JWT токен из localStorage
             const userToken = localStorage.getItem("access_token") || "";
-            
+
             // Отправляем токен на бэкенд
             const response = await fetch(buildUrl(API_CONFIG.ENDPOINTS.GOOGLE_SET_TOKEN), {
               method: "POST",
               headers: {
-                "Content-Type": "application/x-www-form-urlencoded",
+                "Content-Type": "application/json",
                 "Authorization": `Bearer ${userToken}`,
               },
-              body: new URLSearchParams({
+              body: JSON.stringify({
                 google_token: token,
                 refresh_token: refreshToken || "",
-              }),
+              })
             });
 
             if (response.ok) {

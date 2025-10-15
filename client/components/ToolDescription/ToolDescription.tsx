@@ -46,11 +46,11 @@ const ToolDescription: React.FC<ToolDescriptionProps> = ({
       </div>
 
       <div className={`
-        fixed top-0 right-0 h-screen bg-white shadow-xl z-[100]
+        w-[500px] min-[1960px]:w-[1000px] min-[2500px]:w-[1500px] fixed top-0 right-0 h-screen bg-white shadow-xl z-[100]
         transform transition-all duration-500 ease-in-out
         ${isExpanded ? 'translate-x-0 opacity-100' : 'translate-x-full opacity-0'}
       `}
-      style={{ width: '450px', maxWidth: '95vw' }}>
+      >
         
         <div className="flex items-center justify-between p-6 border-b border-gray-200 bg-gray-50">
           <h3 className="text-xl font-bold text-gray-900">Детальное описание</h3>

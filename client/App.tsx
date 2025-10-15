@@ -1,11 +1,15 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import "./global.css";
 import { Toaster } from "@/components/ui/toaster";
 import { createRoot } from "react-dom/client";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import Documentation from "@/pages/Documentation.tsx";
+import AdminDocumentationPage from "./pages/admin/documentation.tsx";
+import AdminFeedbackPage from "./pages/admin/feedback.tsx";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { useLocation } from 'react-router-dom';
 
 import "./i18n/config";
 
@@ -15,22 +19,19 @@ import { AuthHandler } from "@/components/auth";
 // Auth imports
 import { AuthProvider, useAuth } from "./hooks/useAuth.jsx";
 import ProtectedRoute from "./components/ui/ProtectedRoute";
-import RegisterPage from "./pages/RegisterPage";
+import RegisterPage from "./pages/RegisterPage.tsx";
 
 // Layout imports
 import { Header, Sidebar } from "./components/layout";
 
 // Page imports
 import TextAnalyzer from "./pages/TextAnalyzer";
-
 import Semantix from "./pages/Semantix";
 import QueryIndex from "./pages/QueryIndex";
 import Admin from "./pages/Admin.tsx";
-
-// import QueryIndex from './pages/QueryIndex'; // Временно отключено
 import PlaceholderPage from "./pages/PlaceholderPage";
 import PersonalAccount from "./pages/PersonalAccount";
-import LoginPage from "./pages/LoginPage";
+import LoginPage from "./pages/LoginPage.tsx";
 import LinkAnalyzer from "@/pages/LinkAnalyzer.tsx";
 
 const queryClient = new QueryClient();
@@ -39,8 +40,17 @@ const queryClient = new QueryClient();
 const MainLayout: React.FC = () => {
   const [currentPage, setCurrentPage] = useState("semantics");
   const { availableServices } = useAuth();
+  const location = useLocation();
 
-  // Проверяем, нужно ли пока��ать AuthHandler
+  useEffect(() => {
+    const path = location.pathname;
+    if (path === '/admin/documentation') {
+      setCurrentPage('admin-documentation');
+    } else if (path === '/documentation') {
+      setCurrentPage('documentation');
+    }
+  }, [location]);
+
   const currentPath = window.location.pathname;
   if (
     currentPath === "/auth/yandex/success" ||
@@ -93,12 +103,7 @@ const MainLayout: React.FC = () => {
           />
         );
       case "documentation":
-        return (
-          <PlaceholderPage
-            title="Документация"
-            description="Справочные материалы и руководства по использованию сервиса"
-          />
-        );
+        return <Documentation />;
       case "profile":
         return (
           <PersonalAccount
@@ -120,6 +125,12 @@ const MainLayout: React.FC = () => {
             description="Последние новости и обновления в нашем Telegram-канале"
           />
         );
+      case "admin-documentation":
+        return <AdminDocumentationPage />;
+      case "admin-accounts":
+        return <Admin />;
+      case "admin-feedback":
+        return <AdminFeedbackPage />;
       default:
         return (
           <PlaceholderPage
@@ -158,29 +169,38 @@ const MainApp: React.FC = () => {
         <Route path="/auth/yandex/success" element={<AuthHandler />} />
         <Route path="/auth/google/success" element={<AuthHandler />} />
 
-        {/* Защищенные маршруты */}
         <Route
-          path="/app/*"
+          path="/*"
           element={
             <ProtectedRoute>
               <MainLayout />
             </ProtectedRoute>
           }
         />
+
         <Route
-          path="/admin"
+          path="/admin/documentation"
           element={
             <ProtectedRoute requireAdmin={true}>
-              <Admin />
+              <MainLayout />
             </ProtectedRoute>
           }
         />
 
         <Route
-          path="/app/analyzer"
+          path="/admin/feedback"
           element={
-            <ProtectedRoute>
-              <TextAnalyzer />
+            <ProtectedRoute requireAdmin={true}>
+              <MainLayout />
+            </ProtectedRoute>
+          }
+        />
+        
+        <Route
+          path="/admin/accounts"
+          element={
+            <ProtectedRoute requireAdmin={true}>
+              <MainLayout />
             </ProtectedRoute>
           }
         />

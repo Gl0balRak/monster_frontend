@@ -31,12 +31,9 @@ interface DirectAccount {
 
 export default function Admin() {
   const { toast } = useToast();
-  const [webmasterAccounts, setWebmasterAccounts] = useState<YandexAccount[]>(
-    [],
-  );
+  const [webmasterAccounts, setWebmasterAccounts] = useState<YandexAccount[]>([]);
   const [directAccounts, setDirectAccounts] = useState<DirectAccount[]>([]);
 
-  // Form states for adding new accounts
   const [newWebmasterAccount, setNewWebmasterAccount] = useState({
     login: "",
     password: "",
@@ -50,7 +47,6 @@ export default function Admin() {
   const [isLoadingWebmaster, setIsLoadingWebmaster] = useState(false);
   const [isLoadingDirect, setIsLoadingDirect] = useState(false);
 
-  // Load existing accounts on component mount
   useEffect(() => {
     loadWebmasterAccounts();
     loadDirectAccounts();
@@ -65,7 +61,6 @@ export default function Admin() {
       if (response.ok) {
         const data = await response.json();
         setWebmasterAccounts(data.accounts);
-
       } else {
         throw new Error("Failed to load webmaster accounts");
       }
@@ -93,7 +88,6 @@ export default function Admin() {
 
       if (response.ok) {
         const data = await response.json();
-        // data.tokens — массив объектов { id, token }
         setDirectAccounts(data.tokens || []);
       } else {
         throw new Error("Failed to load direct accounts");
@@ -143,7 +137,7 @@ export default function Admin() {
 
       if (response.ok) {
         const result = await response.json();
-        await loadWebmasterAccounts(); // Reload accounts from server
+        await loadWebmasterAccounts();
         setNewWebmasterAccount({ login: "", password: "", security_answer: "" });
 
         toast({
@@ -204,7 +198,7 @@ export default function Admin() {
 
       if (response.ok) {
         const result = await response.json();
-        await loadDirectAccounts(); // Reload accounts from server
+        await loadDirectAccounts();
         setNewDirectAccount({ token: "" });
 
         toast({
@@ -260,7 +254,7 @@ export default function Admin() {
 
       if (response.ok) {
         const result = await response.json();
-        await loadWebmasterAccounts(); // Reload accounts from server
+        await loadWebmasterAccounts();
         toast({
           title: "Успех",
           description: result.message || "Аккаунт Яндекс.Вебмастер удален",
@@ -312,7 +306,7 @@ export default function Admin() {
 
       if (response.ok) {
         const result = await response.json();
-        await loadDirectAccounts(); // Reload accounts from server
+        await loadDirectAccounts();
         toast({
           title: "Успех",
           description: result.message || "Аккаунт Яндекс.Директ удален",
@@ -341,14 +335,18 @@ export default function Admin() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
-      <div className="max-w-7xl mx-auto">
-        <h1 className="text-3xl font-bold text-gray-900 mb-8">
-          Административная панель
-        </h1>
+    <div className="flex-1 bg-gray-50 p-6">
+      <div className="w-full max-w-7xl mx-auto">
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">
+            Управление аккаунтами
+          </h1>
+          <p className="text-gray-600">
+            Управление аккаунтами Яндекс.Вебмастер и Яндекс.Директ
+          </p>
+        </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* Yandex Webmaster Accounts */}
           <Card>
             <CardHeader>
               <CardTitle className="text-xl">
@@ -356,7 +354,6 @@ export default function Admin() {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
-              {/* Existing accounts table */}
               <div>
                 <h3 className="text-lg font-semibold mb-4">
                   Существующие аккаунты
@@ -373,48 +370,47 @@ export default function Admin() {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {
-                        webmasterAccounts.map((account) => (
-                          <TableRow key={account.id}>
-                            <TableCell>
-                              <div className="flex items-center justify-center">
-                                <div
-                                  className={`w-3 h-3 rounded-full ${
-                                    account.status === "active" ? "bg-green-500" :
-                                      account.status === "error" ? "bg-red-500" :
-                                        account.status === "warning" ? "bg-yellow-500" :
-                                          "bg-gray-400"
-                                  }`}
-                                  title={
-                                    account.status === "active" ? "Аккаунт работает нормально" :
-                                      account.status === "error" ? "Проблема с аккаунтом" :
-                                        account.status === "warning" ? "Предупреждение" :
-                                          "Статус не определен"
-                                  }
-                                />
-                              </div>
-                            </TableCell>
-                            <TableCell className="font-medium">
-                              {account.login}
-                            </TableCell>
-                            <TableCell>
-                              {"•".repeat(account.password.length)}
-                            </TableCell>
-                            <TableCell>
-                              {"•".repeat(account.security_answer.length)}
-                            </TableCell>
-                            <TableCell>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => deleteWebmasterAccount(account.id)}
-                                className="text-red-600 hover:text-red-700"
-                              >
-                                <Trash2 className="h-4 w-4" />
-                              </Button>
-                            </TableCell>
-                          </TableRow>
-                        ))}
+                      {webmasterAccounts.map((account) => (
+                        <TableRow key={account.id}>
+                          <TableCell>
+                            <div className="flex items-center justify-center">
+                              <div
+                                className={`w-3 h-3 rounded-full ${
+                                  account.status === "active" ? "bg-green-500" :
+                                  account.status === "error" ? "bg-red-500" :
+                                  account.status === "warning" ? "bg-yellow-500" :
+                                  "bg-gray-400"
+                                }`}
+                                title={
+                                  account.status === "active" ? "Аккаунт работает нормально" :
+                                  account.status === "error" ? "Проблема с аккаунтом" :
+                                  account.status === "warning" ? "Предупреждение" :
+                                  "Статус не определен"
+                                }
+                              />
+                            </div>
+                          </TableCell>
+                          <TableCell className="font-medium">
+                            {account.login}
+                          </TableCell>
+                          <TableCell>
+                            {"•".repeat(account.password.length)}
+                          </TableCell>
+                          <TableCell>
+                            {"•".repeat(account.security_answer.length)}
+                          </TableCell>
+                          <TableCell>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => deleteWebmasterAccount(account.id)}
+                              className="text-red-600 hover:text-red-700"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      ))}
                     </TableBody>
                   </Table>
                 ) : (
@@ -422,7 +418,6 @@ export default function Admin() {
                 )}
               </div>
 
-              {/* Add new account form */}
               <div>
                 <h3 className="text-lg font-semibold mb-4">
                   Добавить новый аккаунт
@@ -488,13 +483,11 @@ export default function Admin() {
             </CardContent>
           </Card>
 
-          {/* Yandex Direct Accounts */}
           <Card>
             <CardHeader>
               <CardTitle className="text-xl">Аккаунты Яндекс.Директ</CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
-              {/* Existing accounts table */}
               <div>
                 <h3 className="text-lg font-semibold mb-4">
                   Существующие аккаунты
@@ -532,7 +525,6 @@ export default function Admin() {
                 )}
               </div>
 
-              {/* Add new account form */}
               <div>
                 <h3 className="text-lg font-semibold mb-4">
                   Добавить новый аккаунт

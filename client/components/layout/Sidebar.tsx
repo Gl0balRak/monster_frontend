@@ -2,6 +2,8 @@ import React from "react";
 import { cn } from "@/lib/utils";
 import { commonClasses } from "@/lib/design-system";
 import BackToTopButton from "@/components/ui/BackToTopButton.tsx";
+import { useAuth } from '@/hooks/useAuth';
+import { useNavigate } from 'react-router-dom'
 
 interface SidebarProps {
   currentPage: string;
@@ -185,6 +187,40 @@ const LinkAnalyzerIcon = () => (
   </svg>
 )
 
+const AdminIcon = () => (
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path
+      fillRule="evenodd"
+      clipRule="evenodd"
+      d="M3 17.25V21H6.75L17.81 9.94L14.06 6.19L3 17.25ZM5.92 19H5V18.08L14.06 9.02L14.98 9.94L5.92 19ZM20.71 5.63L18.37 3.29C18.17 3.09 17.92 3 17.66 3C17.4 3 17.15 3.1 16.96 3.29L15.13 5.12L18.88 8.87L20.71 7.04C21.1 6.65 21.1 6.02 20.71 5.63Z"
+      fill="currentColor"
+    />
+  </svg>
+);
+
+const FeedbackIcon = () => (
+  <svg
+    width="24"
+    height="24"
+    viewBox="0 0 24 24"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <path
+      fillRule="evenodd"
+      clipRule="evenodd"
+      d="M4 4C2.89543 4 2 4.89543 2 6V18C2 19.1046 2.89543 20 4 20H20C21.1046 20 22 19.1046 22 18V6C22 4.89543 21.1046 4 20 4H4ZM4 6H20V18H4V6Z"
+      fill="currentColor"
+    />
+    <path
+      fillRule="evenodd"
+      clipRule="evenodd"
+      d="M4.2318 6.19527C4.58558 5.89083 5.11523 5.92704 5.41967 6.28082L12 13.8787L18.5803 6.28082C18.8848 5.92704 19.4144 5.89083 19.7682 6.19527C20.122 6.49971 20.1582 7.02936 19.8538 7.38314L12.6367 15.7192C12.2852 16.1269 11.7148 16.1269 11.3633 15.7192L4.14625 7.38314C3.84181 7.02936 3.87802 6.49971 4.2318 6.19527Z"
+      fill="currentColor"
+    />
+  </svg>
+);
+
 interface MenuItem {
   id: string;
   label: string;
@@ -250,6 +286,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
   currentPage,
   onPageChange,
 }) => {
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const isAdmin = user?.is_admin === true;
   const [expandedItems, setExpandedItems] = React.useState<string[]>([
     "services",
   ]);
@@ -259,6 +298,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
     return saved ? JSON.parse(saved) : false;
   });
   const hoverTimeoutRef = React.useRef<NodeJS.Timeout | null>(null);
+
+  const isItemActive = (itemId: string) => {
+    return currentPage === itemId;
+  };
 
   const toggleExpanded = (itemId: string) => {
     setExpandedItems((prev) =>
@@ -282,7 +325,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
         clearTimeout(hoverTimeoutRef.current);
         hoverTimeoutRef.current = null;
       }
-      setExpandedItems([]);
       setTimeout(() => {
         setIsHovered(false);
       }, 150);
@@ -297,8 +339,20 @@ export const Sidebar: React.FC<SidebarProps> = ({
     
     if (newPinnedState) {
       setIsHovered(true);
+      setExpandedItems(prev => prev.length ? prev : ["services"]);
+    } else {
+      setIsHovered(false);
     }
   };
+
+  React.useEffect(() => {
+    console.log('Sidebar state:', {
+      currentPage,
+      expandedItems,
+      isHovered,
+      isPinned
+    });
+  }, [currentPage, expandedItems, isHovered, isPinned]);
 
   React.useEffect(() => {
     return () => {
@@ -309,21 +363,21 @@ export const Sidebar: React.FC<SidebarProps> = ({
   }, []);
 
   const PinIcon = () => (
-  <svg
-    width="16"
-    height="16"
-    viewBox="0 0 16 16"
-    fill="none"
-    xmlns="http://www.w3.org/2000/svg"
-  >
-    <path
-      fillRule="evenodd"
-      clipRule="evenodd"
-      d="M5 7V5C5 3.34315 6.34315 2 8 2C9.65685 2 11 3.34315 11 5V7H12C12.5523 7 13 7.44772 13 8V12C13 12.5523 12.5523 13 12 13H4C3.44772 13 3 12.5523 3 12V8C3 7.44772 3.44772 7 4 7H5ZM7 5C7 4.44772 7.44772 4 8 4C8.55228 4 9 4.44772 9 5V7H7V5Z"
-      fill={isPinned ? "#495057" : "#868E96"}
-    />
-  </svg>
-);
+    <svg
+      width="16"
+      height="16"
+      viewBox="0 0 16 16"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        fillRule="evenodd"
+        clipRule="evenodd"
+        d="M5 7V5C5 3.34315 6.34315 2 8 2C9.65685 2 11 3.34315 11 5V7H12C12.5523 7 13 7.44772 13 8V12C13 12.5523 12.5523 13 12 13H4C3.44772 13 3 12.5523 3 12V8C3 7.44772 3.44772 7 4 7H5ZM7 5C7 4.44772 7.44772 4 8 4C8.55228 4 9 4.44772 9 5V7H7V5Z"
+        fill={isPinned ? "#495057" : "#868E96"}
+      />
+    </svg>
+  );
 
   return (
     <aside 
@@ -342,8 +396,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         margin: 0,
       }}
     >
-
-    <div 
+      <div 
         className="bg-white rounded-lg p-2 flex-1 overflow-hidden relative"
         style={{
           margin: 0,
@@ -396,7 +449,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     "text-red-9":
                       (item.subItems && currentPage.startsWith(item.id)) ||
                       (!item.subItems && currentPage === item.id),
-                      "text-black": !(
+                    "text-black": !(
                       (item.subItems && currentPage.startsWith(item.id)) ||
                       (!item.subItems && currentPage === item.id)
                     ),
@@ -406,13 +459,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
               >
                 <span
                   className={cn("flex-shrink-0",{
-                    "text-red-9":
-                      (item.subItems && currentPage.startsWith(item.id)) ||
-                      (!item.subItems && currentPage === item.id),
-                    "text-black": !(
-                      (item.subItems && currentPage.startsWith(item.id)) ||
-                      (!item.subItems && currentPage === item.id)
-                    ),
+                    "text-red-9": isItemActive(item.id),
+                    "text-black": !isItemActive(item.id),
                   })}
                 >
                   {item.icon}
@@ -463,16 +511,15 @@ export const Sidebar: React.FC<SidebarProps> = ({
                           commonClasses.font,
                           "font-normal text-sm",
                           {
-                            "text-red-9 bg-red-0": currentPage === subItem.id,
-                            "text-black hover:bg-gray-0":
-                              currentPage !== subItem.id,
+                            "text-red-9 bg-red-0": isItemActive(subItem.id),
+                            "text-black hover:bg-gray-0": !isItemActive(subItem.id),
                           },
                         )}
                       >
                         <span
                           className={cn("flex-shrink-0",{
-                            "text-red-9": currentPage === subItem.id,
-                            "text-[#868E96]": currentPage !== subItem.id,
+                            "text-red-9": isItemActive(subItem.id),
+                            "text-[#868E96]": !isItemActive(subItem.id),
                           })}
                         >
                           {subItem.icon}
@@ -493,9 +540,121 @@ export const Sidebar: React.FC<SidebarProps> = ({
               )}
             </div>
           ))}
+
+          {/* АДМИН-МЕНЮ (только для админов) */}
+          {isAdmin && (
+            <div className="mt-8 pt-3 border-t border-gray-200">
+              <button
+                onClick={() => toggleExpanded('admin')}
+                className={cn(
+                  "w-full flex items-center rounded text-left py-3 pr-3 pl-[5px]",
+                  commonClasses.transition,
+                  commonClasses.font,
+                  "font-normal text-sm",
+                  {
+                    "hover:bg-gray-0": true,
+                  },
+                )}
+              >
+                <span className={cn("flex-shrink-0", {
+                })}>
+                  <AdminIcon />
+                </span>
+                <span className={cn(
+                  "flex-1 ml-3 whitespace-nowrap transition-opacity duration-150",
+                  {
+                    "opacity-100": isHovered || isPinned,
+                    "opacity-0": !isHovered && !isPinned,
+                  }
+                )}>
+                  Панель управления
+                </span>
+                <span
+                  className={cn(
+                    "transition-all duration-300 ease-in-out ml-2",
+                    {
+                      "rotate-180": expandedItems.includes('admin'),
+                      "opacity-100": isHovered || isPinned,
+                      "opacity-0": !isHovered && !isPinned,
+                    },
+                  )}
+                >
+                  <ChevronUpIcon />
+                </span>
+              </button>
+
+              {(isHovered || isPinned) && (
+                <div
+                  className={cn(
+                    "overflow-hidden transition-all duration-200 ease-in-out",
+                    {
+                      "max-h-0 opacity-0": !expandedItems.includes('admin'),
+                      "max-h-96 opacity-100": expandedItems.includes('admin'),
+                    },
+                  )}
+                >
+                  <div className="ml-8 mt-1 space-y-1">
+                    <button
+                      onClick={() => {
+                        navigate('/admin/documentation');
+                        onPageChange('admin-documentation');
+                      }}
+                      className={cn(
+                        "w-full flex items-center p-3 rounded text-left",
+                        commonClasses.transition,
+                        commonClasses.font,
+                        "font-normal text-sm",
+                        {
+                          "text-red-9 bg-red-0": currentPage === 'admin-documentation',
+                          "text-black hover:bg-gray-0": currentPage !== 'admin-documentation',
+                        },
+                      )}
+                    >
+                      <span className={cn("flex-shrink-0", {
+                        "text-red-9": currentPage === 'admin-documentation',
+                        "text-[#868E96]": currentPage !== 'admin-documentation',
+                      })}>
+                        <DocumentIcon />
+                      </span>
+                      <span className="flex-1 ml-3 whitespace-nowrap">
+                        Редактор документации
+                      </span>
+                    </button>
+
+                    <button
+                      onClick={() => {
+                        navigate('/admin/feedback');
+                        onPageChange('admin-feedback');
+                      }}
+                      className={cn(
+                        "w-full flex items-center p-3 rounded text-left",
+                        commonClasses.transition,
+                        commonClasses.font,
+                        "font-normal text-sm",
+                        {
+                          "text-red-9 bg-red-0": currentPage === 'admin-feedback',
+                          "text-black hover:bg-gray-0": currentPage !== 'admin-feedback',
+                        },
+                      )}
+                    >
+                      <span className={cn("flex-shrink-0", {
+                        "text-red-9": currentPage === 'admin-feedback',
+                        "text-[#868E96]": currentPage !== 'admin-feedback',
+                      })}>
+                        <FeedbackIcon />
+                      </span>
+                      <span className="flex-1 ml-3 whitespace-nowrap">
+                        Обратная связь
+                      </span>
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
         </nav>
         {(isHovered || isPinned) && <BackToTopButton />}
       </div>
     </aside>
   );
-  };
+};

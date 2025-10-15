@@ -115,6 +115,14 @@ const TextAnalyzerPage: React.FC = () => {
         setCollocationResults(saved.collocationResults);
       }
 
+      if (saved.lsiResults) {
+        setLsiResults(saved.lsiResults);
+      }
+
+      if (saved.keywordsResults) {
+        setKeywordsResults(saved.keywordsResults);
+      }
+
       if (saved.collocationOriginalPhrases) {
         setCollocationOriginalPhrases(saved.collocationOriginalPhrases);
       }
@@ -155,7 +163,9 @@ const TextAnalyzerPage: React.FC = () => {
       results,
       selectedCompetitors,
       collocationOriginalPhrases,
-      collocationResults, // добавляем результаты коллокаций
+      collocationResults,
+      lsiResults,
+      keywordsResults,
     };
 
     try {
@@ -177,7 +187,9 @@ const TextAnalyzerPage: React.FC = () => {
     additionalResults,
     results,
     selectedCompetitors,
-    collocationResults, // добавляем в зависимости
+    collocationResults,
+    lsiResults,
+    keywordsResults,
   ]);
 
   // Обработчик успешного пересчёта

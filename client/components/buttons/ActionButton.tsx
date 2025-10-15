@@ -8,8 +8,9 @@ interface ActionButtonProps {
   onClick?: () => void;
   disabled?: boolean;
   className?: string;
+  tooltip?: string;
   color:
-    | "red"
+    | "red" 
     | "purple"
     | "green"
     | "blue"
@@ -27,6 +28,7 @@ export const ActionButton: React.FC<ActionButtonProps> = ({
   onClick,
   disabled = false,
   className,
+  tooltip,
   color,
 }) => {
   const colorClasses = {

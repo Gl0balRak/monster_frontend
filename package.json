@@ -12,7 +12,9 @@
   },
   "scripts": {
     "dev": "vite",
-    "build": "npm run build:client && npm run build:server",
+    "dev:api": "node server/documentation-api.js",
+    "dev:all": "concurrently \"npm run dev:api\" \"npm run dev\"",
+    "build": "vite build",
     "build:client": "vite build",
     "build:server": "vite build --config vite.config.server.ts",
     "start": "node dist/server/node-build.mjs",
@@ -22,11 +24,17 @@
     "test:ui": "vitest --ui",
     "test:run": "vitest run",
     "test:coverage": "vitest run --coverage",
-    "test:watch": "vitest --watch"
+    "test:watch": "vitest --watch",
+    "server": "node server/documentation-server.js",
+    "dev:full": "concurrently \"npm run server\" \"npm run dev\"",
+    "preview": "vite preview"
   },
   "dependencies": {
+    "compendium-js": "^0.0.32",
     "dotenv": "^17.2.0",
-    "express": "^4.18.2",
+    "emailjs-com": "^3.2.0",
+    "express": "^4.21.2",
+    "fuse.js": "^7.1.0",
     "i18next": "^25.4.2",
     "i18next-browser-languagedetector": "^8.2.0",
     "react-i18next": "^15.7.2",
@@ -82,6 +90,7 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "cmdk": "^1.0.0",
+    "concurrently": "^9.2.1",
     "cors": "^2.8.5",
     "date-fns": "^3.6.0",
     "embla-carousel-react": "^8.3.0",
